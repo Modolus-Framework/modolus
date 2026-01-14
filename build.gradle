@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+def hytaleServerPath = getHytaleServerPath(file("hytale.properties"))
+print(hytaleServerPath)
+
+subprojects {
+    apply plugin: 'java'
+
+    group = 'com.modolus'
+    version = '0.0.1'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21);
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+
+    dependencies {
+        compileOnly files(hytaleServerPath)
+        compileOnly "org.projectlombok:lombok:1.18.42"
+        annotationProcessor "org.projectlombok:lombok:1.18.42"
+
+        testImplementation platform('org.junit:junit-bom:5.10.0')
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        testCompileOnly "org.projectlombok:lombok:1.18.42"
+        testAnnotationProcessor "org.projectlombok:lombok:1.18.42"
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+}
+
+static GString getHytaleServerPath(propertiesFile) {
+    if (!propertiesFile.exists()) {
+        if (!propertiesFile.createNewFile()) {
+            throw new GradleException("Failed to create hytale.properties")
+        }
+
+        def defaultProperties = new Properties();
+        defaultProperties.setProperty("hytale.home", "")
+        defaultProperties.setProperty("hytale.patch-line", "release")
+        defaultProperties.setProperty("hytale.build", "latest")
+
+        propertiesFile.withOutputStream { defaultProperties.store(it, "Hytale properties") }
+        throw new GradleException("Set hytale.home in your hytale.properties")
+    }
+
+    def hytaleProperties = new Properties();
+    propertiesFile.withInputStream { hytaleProperties.load(it) }
+
+    def hytaleHome = hytaleProperties.get('hytale.home')
+    def hytalePatchLine = hytaleProperties.get('hytale.patch-line')
+    def hytaleBuild = hytaleProperties.get('hytale.build')
+
+    return "$hytaleHome/install/$hytalePatchLine/package/game/$hytaleBuild/Server/HytaleServer.jar"
+}
