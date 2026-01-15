@@ -1,6 +1,0 @@
-dependencies {
-    compileOnly project(':modolus-core')
-    implementation "com.palantir.javapoet:javapoet:0.10.0"
-
-    testAnnotationProcessor project(':modolus-command')
-}

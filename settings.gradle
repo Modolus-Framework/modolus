@@ -1,4 +1,6 @@
 rootProject.name = 'modolus'
 
 include 'modolus-core'
-include 'modolus-command'
+include 'modolus-processor'
+include 'modolus-annotations'
+include 'modolus-util'
