@@ -19,7 +19,7 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(21);
+            languageVersion = JavaLanguageVersion.of(25)
         }
     }
 
@@ -29,12 +29,16 @@ subprojects {
 
     dependencies {
         compileOnly files(hytaleServerPath)
+
+        implementation "org.jetbrains:annotations:26.0.2"
         compileOnly "org.projectlombok:lombok:1.18.42"
         annotationProcessor "org.projectlombok:lombok:1.18.42"
 
         testImplementation platform('org.junit:junit-bom:5.10.0')
         testImplementation 'org.junit.jupiter:junit-jupiter'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+        testImplementation files(hytaleServerPath)
         testCompileOnly "org.projectlombok:lombok:1.18.42"
         testAnnotationProcessor "org.projectlombok:lombok:1.18.42"
     }
@@ -51,7 +55,7 @@ static GString getHytaleServerPath(propertiesFile) {
             throw new GradleException("Failed to create hytale.properties")
         }
 
-        def defaultProperties = new Properties();
+        def defaultProperties = new Properties()
         defaultProperties.setProperty("hytale.home", "")
         defaultProperties.setProperty("hytale.patch-line", "release")
         defaultProperties.setProperty("hytale.build", "latest")
@@ -60,7 +64,7 @@ static GString getHytaleServerPath(propertiesFile) {
         throw new GradleException("Set hytale.home in your hytale.properties")
     }
 
-    def hytaleProperties = new Properties();
+    def hytaleProperties = new Properties()
     propertiesFile.withInputStream { hytaleProperties.load(it) }
 
     def hytaleHome = hytaleProperties.get('hytale.home')
