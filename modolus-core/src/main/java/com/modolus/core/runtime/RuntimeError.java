@@ -1,0 +1,8 @@
+package com.modolus.core.runtime;
+
+public enum RuntimeError {
+
+    NO_AVAILABLE_CLASS_LOADER,
+    FAILED_TO_LOAD_RESOURCES,
+    FAILED_TO_LOAD_CLASS, FAILED_TO_READ_CLASSES, FAILED_TO_CREATE_CLASS
+}

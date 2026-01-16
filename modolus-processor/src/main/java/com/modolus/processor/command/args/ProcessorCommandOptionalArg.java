@@ -2,6 +2,7 @@ package com.modolus.processor.command.args;
 
 import com.palantir.javapoet.*;
 import lombok.Builder;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -15,8 +16,9 @@ public record ProcessorCommandOptionalArg(String name,
                                           TypeMirror type,
                                           String argTypeName) implements ProcessorCommandArg {
 
+    @Contract("_ -> new")
     @Override
-    public FieldSpec toFieldSpec(ProcessingEnvironment processingEnvironment) {
+    public @NotNull FieldSpec toFieldSpec(ProcessingEnvironment processingEnvironment) {
         return FieldSpec.builder(getBaseType("OptionalArg", type()), name())
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer("withOptionalArg($S, $S, $T.$L)", name(), description(), getArgType(), argTypeName())
@@ -24,7 +26,7 @@ public record ProcessorCommandOptionalArg(String name,
     }
 
     @Override
-    public ParameterSpec toParameterSpec(ProcessingEnvironment processingEnvironment) {
+    public @NotNull ParameterSpec toParameterSpec(ProcessingEnvironment processingEnvironment) {
         var optionalType = ParameterizedTypeName.get(ClassName.get(Optional.class), TypeName.get(type()));
         return ParameterSpec.builder(optionalType, name())
                 .addModifiers(Modifier.FINAL)
@@ -32,8 +34,9 @@ public record ProcessorCommandOptionalArg(String name,
                 .build();
     }
 
+    @Contract(" -> new")
     @Override
-    public CodeBlock toStatement() {
+    public @NotNull CodeBlock toStatement() {
         return CodeBlock.of("$N.provided(commandContext) ? Optional.of($N.get(commandContext)) : Optional.empty()", name(), name());
     }
 

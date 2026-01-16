@@ -46,9 +46,9 @@ public class ProcessorCommandArgConverter {
         return name;
     }
 
-    private static @NotNull ProcessorCommandArg createDefaultArg(@NotNull String name,
-                                                                 @NotNull String description,
-                                                                 @NotNull DefaultArg defaultArg) {
+    private static @NotNull @Unmodifiable ProcessorCommandArg createDefaultArg(@NotNull String name,
+                                                                               @NotNull String description,
+                                                                               @NotNull DefaultArg defaultArg) {
         return ProcessorCommandDefaultArg.builder()
                 .name(name)
                 .description(description)
@@ -59,9 +59,9 @@ public class ProcessorCommandArgConverter {
                 .build();
     }
 
-    private static @NotNull ProcessorCommandArg createOptionalArg(@NotNull String name,
-                                                                  @NotNull String description,
-                                                                  @NotNull OptionalArg optionalArg) {
+    private static @NotNull @Unmodifiable ProcessorCommandArg createOptionalArg(@NotNull String name,
+                                                                                @NotNull String description,
+                                                                                @NotNull OptionalArg optionalArg) {
         return ProcessorCommandOptionalArg.builder()
                 .name(name)
                 .description(description)
@@ -70,9 +70,9 @@ public class ProcessorCommandArgConverter {
                 .build();
     }
 
-    private static @NotNull ProcessorCommandArg createRequiredArg(@NotNull String name,
-                                                                  @NotNull String description,
-                                                                  @NotNull RequiredArg requiredArg) {
+    private static @NotNull @Unmodifiable ProcessorCommandArg createRequiredArg(@NotNull String name,
+                                                                                @NotNull String description,
+                                                                                @NotNull RequiredArg requiredArg) {
         return ProcessorCommandRequiredArg.builder()
                 .name(name)
                 .description(description)
@@ -81,8 +81,8 @@ public class ProcessorCommandArgConverter {
                 .build();
     }
 
-    private static @NotNull ProcessorCommandArg createFlagArg(@NotNull String name,
-                                                              @NotNull String description) {
+    private static @NotNull @Unmodifiable ProcessorCommandArg createFlagArg(@NotNull String name,
+                                                                            @NotNull String description) {
         return ProcessorCommandFlagArg.builder()
                 .name(name)
                 .description(description)

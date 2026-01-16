@@ -1,0 +1,10 @@
+package com.modolus.util.singleton;
+
+public enum SingletonError {
+
+    NO_INSTANCE_AVAILABLE,
+    TYPE_ALREADY_PROVIDED,
+    INSTANCE_IS_NOT_THE_REQUESTED_TYPE,
+    VALUE_DOES_NOT_IMPLEMENT_SINGLETON_INTERFACE
+
+}

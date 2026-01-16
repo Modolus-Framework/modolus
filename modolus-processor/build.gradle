@@ -2,6 +2,9 @@ dependencies {
     implementation project(":modolus-annotations")
     implementation project(":modolus-util")
     implementation "com.palantir.javapoet:javapoet:0.10.0"
+    implementation "org.apache.commons:commons-text:1.15.0"
+    implementation "tools.jackson.core:jackson-core:3.0.3"
+    implementation 'tools.jackson.core:jackson-databind:3.0.3'
 
     testCompileOnly project(":modolus-annotations")
     testAnnotationProcessor project(':modolus-processor')

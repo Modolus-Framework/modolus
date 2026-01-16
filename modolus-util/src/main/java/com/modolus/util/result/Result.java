@@ -1,5 +1,6 @@
 package com.modolus.util.result;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,7 +9,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class Result<T, E> {
 
@@ -20,23 +20,45 @@ public class Result<T, E> {
         this.error = error;
     }
 
-    public static <T, E> Result<T, E> success(T value) {
+    @Contract(value = "_ -> new", pure = true)
+    public static <T, E> @NotNull Result<T, E> success(@NotNull T value) {
         return new Result<>(value, null);
     }
 
-    public static <T, E> Result<T, E> failure(E error) {
+    public static <E> @NotNull Result<Void, E> success() {
+        return new Result<>(null, null);
+    }
+
+    @Contract(value = "_ -> new", pure = true)
+    public static <T, E> @NotNull Result<T, E> failure(E error) {
         return new Result<>(null, error);
     }
 
-    @SafeVarargs
-    public static <T> Result<T, Exception> ofException(Supplier<T> supplier, Class<? extends Exception>... exceptionClass) {
+    public static <T, E extends Exception> Result<T, E> ofException(ExceptionSupplier<T, E> supplier, Class<E> exceptionClass) {
         try {
             return success(supplier.get());
         } catch (Exception e) {
-            for (var clazz : exceptionClass) {
-                if (clazz.isInstance(e)) return failure(e);
-            }
-            throw e;
+            if (exceptionClass.isInstance(e)) return Result.failure(exceptionClass.cast(e));
+            throw new UnexpectedErrorException(e);
+        }
+    }
+
+    public static <T, E extends Exception> Result<T, GenericError> ofNullableWithException(ExceptionSupplier<@Nullable T, E> supplier, Class<E> exceptionClass) {
+        try {
+            return ofNullable(supplier.get());
+        } catch (Exception e) {
+            if (exceptionClass.isInstance(e)) return Result.failure(GenericError.EXCEPTION_THROWN);
+            throw new UnexpectedErrorException(e);
+        }
+    }
+
+    public static <E extends Exception> Result<Void, E> ofException(ExceptionRunnable<E> supplier, Class<E> exceptionClass) {
+        try {
+            supplier.run();
+            return success();
+        } catch (Exception e) {
+            if (exceptionClass.isInstance(e)) return Result.failure(exceptionClass.cast(e));
+            throw new UnexpectedErrorException(e);
         }
     }
 
@@ -44,11 +66,11 @@ public class Result<T, E> {
         return value == null ? failure(GenericError.NULL_VALUE) : success(value);
     }
 
-    public static <T> Result<T, IllegalStateException> ofOptional(Optional<T> optional) {
+    public static <T> Result<T, IllegalStateException> ofOptional(@NotNull Optional<T> optional) {
         return optional.<Result<T, IllegalStateException>>map(Result::success).orElseGet(() -> failure(new IllegalStateException("Optional was empty.")));
     }
 
-    public static <T extends Collection<E>, E> Result<T, GenericError> ofPossibleEmpty(T collection) {
+    public static <T extends Collection<E>, E> Result<T, GenericError> ofPossibleEmpty(@NotNull T collection) {
         return collection.isEmpty() ? Result.failure(GenericError.EMPTY_COLLECTION) : Result.success(collection);
     }
 
@@ -91,6 +113,22 @@ public class Result<T, E> {
         return success(mapper.apply(value));
     }
 
+    public <O, X extends Exception> @NotNull Result<O, E> mapException(ExceptionFunction<T, @NotNull O, X> mapper,
+                                                                       Function<X, @NotNull E> failureMapper,
+                                                                       Class<X> exceptionClass) {
+        if (isFailure()) return failure(error);
+        return ofException(() -> mapper.apply(value), exceptionClass)
+                .mapError(failureMapper);
+    }
+
+    public <X extends Exception> @NotNull Result<Void, E> mapException(ExceptionConsumer<T, X> supplier,
+                                                                       Function<X, @NotNull E> failureMapper,
+                                                                       Class<X> exceptionClass) {
+        if (isFailure()) return failure(error);
+        return ofException(() -> supplier.apply(value), exceptionClass)
+                .mapError(failureMapper);
+    }
+
     public <X> @NotNull Result<T, X> mapError(Function<E, X> mapper) {
         if (isSuccess()) return success(value);
         return failure(mapper.apply(error));
@@ -100,9 +138,26 @@ public class Result<T, E> {
         return new ResultErrorSwitch<>(this, isSuccess());
     }
 
-    public @NotNull Result<T, E> recover(Function<E, T> mapper) {
+    public @NotNull Result<T, E> recover(Function<E, @NotNull T> mapper) {
         if (isSuccess()) return this;
         return success(mapper.apply(error));
+    }
+
+    public @NotNull Result<T, GenericError> recoverNullable(Function<E, @Nullable T> mapper) {
+        if (isSuccess()) return success(value);
+        return ofNullable(mapper.apply(error));
+    }
+
+    public <X extends Exception> @NotNull Result<T, X> tryRecover(ExceptionFunction<E, @NotNull T, X> mapper,
+                                                                  Class<X> exceptionClass) {
+        if (isSuccess()) return success(value);
+        return Result.ofException(() -> mapper.apply(error), exceptionClass);
+    }
+
+    public <X extends Exception> @NotNull Result<T, GenericError> tryRecoverNullable(ExceptionFunction<E, @Nullable T, X> mapper,
+                                                                                     Class<X> exceptionClass) {
+        if (isSuccess()) return success(value);
+        return Result.ofNullableWithException(() -> mapper.apply(error), exceptionClass);
     }
 
     public <X> @NotNull Result<X, E> flatMap(Function<T, Result<X, E>> mapper) {

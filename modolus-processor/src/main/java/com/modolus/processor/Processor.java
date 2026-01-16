@@ -1,10 +1,19 @@
 package com.modolus.processor;
 
+import lombok.RequiredArgsConstructor;
+
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
-import java.io.IOException;
+import java.util.Map;
 
-public interface Processor {
+@RequiredArgsConstructor
+public abstract class Processor {
 
-    void processSingle(Element annotated, String className) throws IOException;
+    protected final ProcessingEnvironment processingEnv;
+
+    public abstract void processSingle(Element annotated,
+                                       String className,
+                                       Map<String, SourceFileWriter> writers,
+                                       SharedContext sharedContext);
 
 }
