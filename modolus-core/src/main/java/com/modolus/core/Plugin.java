@@ -6,6 +6,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.modolus.annotations.plugin.HytalePlugin;
 import com.modolus.annotations.plugin.PluginAuthor;
+import com.modolus.core.database.DatabaseConfiguration;
 import com.modolus.core.logger.Logger;
 import com.modolus.core.runtime.Runtime;
 import com.modolus.core.runtime.RuntimeError;
@@ -40,6 +41,7 @@ public final class Plugin extends JavaPlugin implements Singleton {
     protected void setup() {
         Logger.provideRootLogger(getLogger());
         Singletons.provideSingleton(JavaPlugin.class, this, SingletonScope.ROOT);
+        DatabaseConfiguration.provideDatabaseConfiguration(SingletonScope.ROOT);
         Runtime.initializeRuntime()
                 .onFailure(this::handleRuntimeInitializationError);
     }
