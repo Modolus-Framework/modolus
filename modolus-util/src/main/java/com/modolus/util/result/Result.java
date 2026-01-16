@@ -113,7 +113,7 @@ public class Result<T, E> {
         return success(mapper.apply(value));
     }
 
-    public @NotNull Result<Void, E> map(Consumer<T> mapper) {
+    public @NotNull Result<Void, E> mapVoid(Consumer<T> mapper) {
         if (isFailure()) return failure(error);
         mapper.accept(value);
         return success();
@@ -127,9 +127,9 @@ public class Result<T, E> {
                 .mapError(failureMapper);
     }
 
-    public <X extends Exception> @NotNull Result<Void, E> mapException(ExceptionConsumer<T, X> supplier,
-                                                                       Function<X, @NotNull E> failureMapper,
-                                                                       Class<X> exceptionClass) {
+    public <X extends Exception> @NotNull Result<Void, E> mapExceptionVoid(ExceptionConsumer<T, X> supplier,
+                                                                           Function<X, @NotNull E> failureMapper,
+                                                                           Class<X> exceptionClass) {
         if (isFailure()) return failure(error);
         return ofException(() -> supplier.apply(value), exceptionClass)
                 .mapError(failureMapper);

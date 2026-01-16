@@ -56,8 +56,10 @@ public class InjectSingletonProcessor extends Processor {
         var builder = FieldSpec.builder(lazyType, name)
                 .addModifiers(Modifier.PROTECTED, Modifier.FINAL);
 
-        if (singleton.fieldName().isBlank()) builder.initializer("new $T($T.class, $T.$L)", lazyType, type, SINGLETON_SCOPE_CLASS_NAME, singleton.scope().name());
-        else builder.initializer("new $T($T.class, $T.$L, $S)", lazyType, type, singleton.singletonIdentifier(), SINGLETON_SCOPE_CLASS_NAME, singleton.scope().name());
+        if (singleton.fieldName().isBlank())
+            builder.initializer("new $T($T.class, $T.$L)", lazyType, type, SINGLETON_SCOPE_CLASS_NAME, singleton.scope().name());
+        else
+            builder.initializer("new $T($T.class, $T.$L, $S)", lazyType, type, singleton.singletonIdentifier(), SINGLETON_SCOPE_CLASS_NAME, singleton.scope().name());
 
         return builder.build();
     }

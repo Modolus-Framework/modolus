@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,7 +19,6 @@ public final class RootSingletonManager extends ScopedSingletonManager {
             "com.modolus.annotations"
     );
 
-    private final Map<String, String> scopeBasePackageToScopeNameMap = new HashMap<>();
     private final Map<String, ScopedSingletonManager> scopes = new ConcurrentHashMap<>();
 
     public <T extends Singleton> @NotNull Result<Singleton, SingletonError> provideSingletonInPluginScope(@NotNull T value) {
@@ -60,13 +58,13 @@ public final class RootSingletonManager extends ScopedSingletonManager {
 
     public @NotNull Result<Void, SingletonError> destructSingletonInPluginScope(@NotNull Singleton singleton) {
         return getCallersScopeManager()
-                .map((Consumer<ScopedSingletonManager>) manager ->
+                .mapVoid((Consumer<ScopedSingletonManager>) manager ->
                         manager.destructSingleton(singleton));
     }
 
-    public void registerScope(String scopeBasePackage, String scopeName) {
-        scopeBasePackageToScopeNameMap.put(scopeBasePackage, scopeName);
-        scopes.put(scopeName, new ScopedSingletonManager());
+    public void registerScope(String scopeBasePackage) {
+        if (ROOT_PACKAGE_NAMES.stream().anyMatch(scopeBasePackage::startsWith)) return;
+        scopes.put(scopeBasePackage, new ScopedSingletonManager());
     }
 
     @Override
@@ -83,8 +81,7 @@ public final class RootSingletonManager extends ScopedSingletonManager {
 
     private @NotNull Result<ScopedSingletonManager, SingletonError> getCallersScopeManager() {
         return getCallersPackageName()
-                .flatMap(this::findScopeNameByPackageName)
-                .map(scopes::get);
+                .flatMap(this::findScopeNameByPackageName);
     }
 
     private @NotNull Result<String, SingletonError> getCallersPackageName() {
@@ -96,8 +93,8 @@ public final class RootSingletonManager extends ScopedSingletonManager {
                 .mapError(_ -> SingletonError.FAILED_TO_GET_CALLERS_SCOPE);
     }
 
-    private @NotNull Result<String, SingletonError> findScopeNameByPackageName(String packageName) {
-        return Result.ofOptional(scopeBasePackageToScopeNameMap.entrySet().stream()
+    private @NotNull Result<ScopedSingletonManager, SingletonError> findScopeNameByPackageName(String packageName) {
+        return Result.ofOptional(scopes.entrySet().stream()
                         .filter(entry -> packageName.startsWith(entry.getKey()))
                         .findFirst()
                         .map(Map.Entry::getValue))

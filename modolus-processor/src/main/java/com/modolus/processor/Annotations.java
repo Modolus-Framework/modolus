@@ -11,5 +11,6 @@ final class Annotations {
     static final String INJECT_SINGLETONS_ANNOTATION = "com.modolus.annotations.singleton.InjectSingletons";
     static final String INJECT_SINGLETON_ANNOTATION = "com.modolus.annotations.singleton.InjectSingleton";
     static final String CREATE_ON_RUNTIME_ANNOTATION = "com.modolus.annotations.singleton.CreateOnRuntime";
+    static final String SCOPE_ANNOTATION = "com.modolus.annotations.singleton.Scope";
 
 }

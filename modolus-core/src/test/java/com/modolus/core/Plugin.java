@@ -1,14 +1,15 @@
-package com.modolus.core.database;
+package com.modolus.core;
 
 import com.modolus.annotations.singleton.CreateOnRuntime;
 import com.modolus.annotations.singleton.InjectSingleton;
 import com.modolus.annotations.singleton.ProvideSingleton;
+import com.modolus.annotations.singleton.Scope;
 import com.modolus.core.logger.Logger;
 import com.modolus.util.singleton.SingletonScope;
 
+@Scope
 @CreateOnRuntime
-@InjectSingleton(value = Logger.class)
-@ProvideSingleton(value = Database.class, scope = SingletonScope.ROOT)
-public class DatabaseImpl extends AbstractDatabaseImpl implements Database {
-
+@ProvideSingleton(value = Plugin.class, scope = SingletonScope.ROOT)
+@InjectSingleton(value = Logger.class, scope = SingletonScope.ROOT)
+public class Plugin extends AbstractPlugin {
 }

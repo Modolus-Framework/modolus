@@ -13,7 +13,7 @@ public @interface ProvideSingleton {
     Class<?> value();
 
     String singletonIdentifier() default "";
-    
+
     SingletonScope scope() default SingletonScope.PLUGIN;
 
 }

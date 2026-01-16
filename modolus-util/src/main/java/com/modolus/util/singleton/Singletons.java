@@ -42,25 +42,24 @@ public class Singletons {
         ROOT_SINGLETON_MANAGER.initializeSingletons();
     }
 
-    public static void registerScope(@NotNull String basePackagePath, @NotNull String scopeName) {
-        ROOT_SINGLETON_MANAGER.registerScope(basePackagePath, scopeName);
+    public static void registerScope(@NotNull String basePackagePath) {
+        ROOT_SINGLETON_MANAGER.registerScope(basePackagePath);
     }
 
-    public static <T> Result<T, SingletonError> getSingleton(@NotNull Class<T> clazz, @NotNull SingletonScope firstCheck) {
+    public static <T> @NotNull Result<T, SingletonError> getSingleton(@NotNull Class<T> clazz,
+                                                                      @NotNull SingletonScope firstCheck) {
         if (firstCheck == SingletonScope.ROOT)
-            return ROOT_SINGLETON_MANAGER.getSingleton(clazz)
-                    .recoverFlat(_ -> ROOT_SINGLETON_MANAGER.getSingletonInPluginScope(clazz));
+            return ROOT_SINGLETON_MANAGER.getSingleton(clazz);
 
         return ROOT_SINGLETON_MANAGER.getSingletonInPluginScope(clazz)
                 .recoverFlat(_ -> ROOT_SINGLETON_MANAGER.getSingleton(clazz));
     }
 
-    public static <T> Result<T, SingletonError> getSingleton(@NotNull Class<T> clazz,
-                                                             @NotNull String identifier,
-                                                             @NotNull SingletonScope firstCheck) {
+    public static <T> @NotNull Result<T, SingletonError> getSingleton(@NotNull Class<T> clazz,
+                                                                      @NotNull String identifier,
+                                                                      @NotNull SingletonScope firstCheck) {
         if (firstCheck == SingletonScope.ROOT)
-            return ROOT_SINGLETON_MANAGER.getSingleton(clazz)
-                    .recoverFlat(_ -> ROOT_SINGLETON_MANAGER.getSingletonInPluginScope(clazz, identifier));
+            return ROOT_SINGLETON_MANAGER.getSingleton(clazz);
 
         return ROOT_SINGLETON_MANAGER.getSingletonInPluginScope(clazz)
                 .recoverFlat(_ -> ROOT_SINGLETON_MANAGER.getSingleton(clazz, identifier));

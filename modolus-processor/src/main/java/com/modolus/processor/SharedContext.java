@@ -8,6 +8,7 @@ import java.util.Set;
  */
 public record SharedContext(
         Map<String, Map<String, SourceFileWriter>> sourceFileWriters,
-        Set<String> createOnRuntimeClasses
+        Set<String> createOnRuntimeClasses,
+        Set<String> scopePackages
 ) {
 }

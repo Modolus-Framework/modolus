@@ -25,7 +25,8 @@ import static com.modolus.processor.Annotations.*;
         INJECT_SINGLETONS_ANNOTATION,
         PROVIDE_SINGLETON_ANNOTATION,
         INJECT_SINGLETON_ANNOTATION,
-        CREATE_ON_RUNTIME_ANNOTATION
+        CREATE_ON_RUNTIME_ANNOTATION,
+        SCOPE_ANNOTATION
 })
 @SupportedSourceVersion(SourceVersion.RELEASE_25)
 public class InstanceProcessor extends AbstractProcessor {
@@ -39,12 +40,14 @@ public class InstanceProcessor extends AbstractProcessor {
             PROVIDE_SINGLETONS_ANNOTATION,
             INJECT_SINGLETON_ANNOTATION,
             INJECT_SINGLETONS_ANNOTATION,
-            CREATE_ON_RUNTIME_ANNOTATION
+            CREATE_ON_RUNTIME_ANNOTATION,
+            SCOPE_ANNOTATION
     );
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final Set<String> collectedClassesForRuntimeCreation = new HashSet<>();
+    private final Set<String> collectedScopes = new HashSet<>();
 
     @SneakyThrows
     @Override
@@ -55,10 +58,11 @@ public class InstanceProcessor extends AbstractProcessor {
                 PROVIDE_SINGLETONS_ANNOTATION, new ProvideSingletonsProcessor(processingEnv),
                 INJECT_SINGLETON_ANNOTATION, new InjectSingletonProcessor(processingEnv),
                 INJECT_SINGLETONS_ANNOTATION, new InjectSingletonsProcessor(processingEnv),
-                CREATE_ON_RUNTIME_ANNOTATION, new CreateOnRuntimeProcessor(processingEnv)
+                CREATE_ON_RUNTIME_ANNOTATION, new CreateOnRuntimeProcessor(processingEnv),
+                SCOPE_ANNOTATION, new ScopeProcessor(processingEnv)
         );
 
-        var sharedContext = new SharedContext(new HashMap<>(), new HashSet<>());
+        var sharedContext = new SharedContext(new HashMap<>(), new HashSet<>(), new HashSet<>());
 
         annotations.stream()
                 .sorted(Comparator.comparingInt(this::getAnnotationPriority).reversed())
@@ -72,13 +76,21 @@ public class InstanceProcessor extends AbstractProcessor {
                 .forEach(error -> error.onFailure(e -> e.print(processingEnv)));
 
         collectedClassesForRuntimeCreation.addAll(sharedContext.createOnRuntimeClasses());
+        collectedScopes.addAll(sharedContext.scopePackages());
 
 
         if (roundEnv.processingOver()) {
-            var file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "runtime-classes.json");
-            try (OutputStream outputStream = file.openOutputStream()) {
+            var runtimeClasses = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "runtime-classes.json");
+            try (OutputStream outputStream = runtimeClasses.openOutputStream()) {
                 OBJECT_MAPPER.writeValue(outputStream, collectedClassesForRuntimeCreation);
             }
+
+            var runtimeScopes = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "runtime-scopes.json");
+            try (OutputStream outputStream = runtimeScopes.openOutputStream()) {
+                OBJECT_MAPPER.writeValue(outputStream, collectedScopes);
+            }
+
+
         }
 
         return true;
