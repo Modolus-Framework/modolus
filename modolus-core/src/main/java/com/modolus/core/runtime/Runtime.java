@@ -50,7 +50,11 @@ public class Runtime {
                         .peek(result -> result.tap(clazz -> printInfo("Found class " + clazz.getName())))
                         .map(Runtime::constructClass)
                         .forEach(Runtime::logError))
-                .mapVoid(_ -> Singletons.initializeSingletons());
+                .mapVoid(_ -> {
+                    printInfo("Runtime successfully created all classes");
+                    printInfo("Starting singletons initialization");
+                    Singletons.initializeSingletons();
+                });
     }
 
     private void logError(@NotNull Result<Void, RuntimeError> result) {

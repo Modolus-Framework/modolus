@@ -49,7 +49,7 @@ public final class Plugin extends JavaPlugin implements Singleton {
         Singletons.destructSingletons();
     }
 
-    private void handleRuntimeInitializationError(RuntimeError runtimeError) {
+    private void handleRuntimeInitializationError(@NotNull RuntimeError runtimeError) {
         logger.getOrThrow().atSevere().log("An error occured while booting modolus %s", runtimeError.name());
         HytaleServer.get().shutdownServer(new ShutdownReason(1, "An error occured while booting modolus %s".formatted(runtimeError.name())));
     }

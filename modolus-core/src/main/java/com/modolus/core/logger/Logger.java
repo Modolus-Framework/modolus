@@ -26,7 +26,7 @@ public final class Logger implements Singleton {
     }
 
     public static void provideRootLogger(@NotNull HytaleLogger logger) {
-        new Logger(logger, "", SingletonScope.ROOT);
+        new Logger(logger, "logger", SingletonScope.ROOT);
     }
 
     public HytaleLogger.Api at(Level level) {

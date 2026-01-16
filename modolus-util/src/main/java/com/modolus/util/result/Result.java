@@ -52,7 +52,7 @@ public class Result<T, E> {
         }
     }
 
-    public static <E extends Exception> Result<Void, E> ofException(ExceptionRunnable<E> supplier, Class<E> exceptionClass) {
+    public static <E extends Exception> Result<Void, E> ofExceptionVoid(ExceptionRunnable<E> supplier, Class<E> exceptionClass) {
         try {
             supplier.run();
             return success();
@@ -131,7 +131,7 @@ public class Result<T, E> {
                                                                            Function<X, @NotNull E> failureMapper,
                                                                            Class<X> exceptionClass) {
         if (isFailure()) return failure(error);
-        return ofException(() -> supplier.apply(value), exceptionClass)
+        return ofExceptionVoid(() -> supplier.apply(value), exceptionClass)
                 .mapError(failureMapper);
     }
 
@@ -174,6 +174,12 @@ public class Result<T, E> {
     public <X> @NotNull Result<X, E> flatMap(Function<T, Result<X, E>> mapper) {
         if (isFailure()) return failure(error);
         return mapper.apply(value);
+    }
+
+    public <O, X> @NotNull Result<O, X> flatMap(Function<T, Result<O, X>> mapper,
+                                                Function<E, X> errorMapper) {
+        if (isSuccess()) return mapper.apply(value);
+        return failure(errorMapper.apply(error));
     }
 
     public Result<T, E> tap(Consumer<T> consumer) {
