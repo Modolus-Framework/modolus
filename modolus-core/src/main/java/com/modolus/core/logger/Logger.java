@@ -2,6 +2,7 @@ package com.modolus.core.logger;
 
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.modolus.util.singleton.Singleton;
+import com.modolus.util.singleton.SingletonScope;
 import com.modolus.util.singleton.Singletons;
 import io.sentry.IScopes;
 import lombok.AccessLevel;
@@ -15,13 +16,17 @@ public final class Logger implements Singleton {
 
     private final HytaleLogger hytaleLogger;
 
-    private Logger(HytaleLogger hytaleLogger, String singletonIdentifier) {
+    private Logger(HytaleLogger hytaleLogger, String singletonIdentifier, SingletonScope scope) {
         this(hytaleLogger);
-        Singletons.provideSingleton(this, singletonIdentifier);
+        Singletons.provideSingleton(this, singletonIdentifier, scope);
     }
 
     public static void provideLogger(@NotNull HytaleLogger logger, String loggerIdentifier) {
-        new Logger(logger, loggerIdentifier);
+        new Logger(logger, loggerIdentifier, SingletonScope.PLUGIN);
+    }
+
+    public static void provideRootLogger(@NotNull HytaleLogger logger) {
+        new Logger(logger, "", SingletonScope.ROOT);
     }
 
     public HytaleLogger.Api at(Level level) {

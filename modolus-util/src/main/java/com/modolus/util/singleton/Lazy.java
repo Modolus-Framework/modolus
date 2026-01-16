@@ -9,10 +9,11 @@ import lombok.RequiredArgsConstructor;
 public final class Lazy<T> {
 
     private final Class<T> clazz;
+    private final SingletonScope scope;
     private String singletonIdentifier = null;
 
     public Result<T, SingletonError> get() {
-        return singletonIdentifier == null ? Singletons.getSingleton(clazz) : Singletons.getSingleton(clazz, singletonIdentifier);
+        return singletonIdentifier == null ? Singletons.getSingleton(clazz, scope) : Singletons.getSingleton(clazz, singletonIdentifier, scope);
     }
 
     public T getOrThrow() {

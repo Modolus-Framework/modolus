@@ -38,7 +38,13 @@ public final class CommandProcessor extends Processor {
 
         Arg[] annotatedArgList = new Arg[0];
         var annotatedArgs = annotated.getAnnotation(Args.class);
-        if (annotatedArgs != null) annotatedArgList = annotatedArgs.value();
+
+        if (annotatedArgs == null) {
+            var annotatedArg = annotated.getAnnotation(Arg.class);
+            if (annotatedArg != null) annotatedArgList = new Arg[]{annotatedArg};
+        } else {
+            annotatedArgList = annotatedArgs.value();
+        }
 
         var args = Stream.of(annotatedArgList)
                 .map(arg -> ProcessorCommandArgConverter.fromArg(variableCounter, arg))

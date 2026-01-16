@@ -8,12 +8,14 @@ import com.modolus.core.logger.Logger;
 import com.modolus.core.runtime.Runtime;
 import com.modolus.core.runtime.RuntimeError;
 import com.modolus.util.singleton.Lazy;
+import com.modolus.util.singleton.Singleton;
+import com.modolus.util.singleton.SingletonScope;
 import com.modolus.util.singleton.Singletons;
 import org.jetbrains.annotations.NotNull;
 
-public final class Plugin extends JavaPlugin {
+public final class Plugin extends JavaPlugin implements Singleton {
 
-    private final Lazy<Logger> logger = new Lazy<>(Logger.class);
+    private final Lazy<Logger> logger = new Lazy<>(Logger.class, SingletonScope.ROOT);
 
     public Plugin(@NotNull JavaPluginInit init) {
         super(init);
@@ -21,7 +23,8 @@ public final class Plugin extends JavaPlugin {
 
     @Override
     protected void setup() {
-        Logger.provideLogger(getLogger(), "");
+        Logger.provideRootLogger(getLogger());
+        Singletons.provideSingleton(JavaPlugin.class, this, "modolus-core", SingletonScope.ROOT);
         Runtime.initializeRuntime()
                 .onFailure(this::handleRuntimeInitializationError);
     }

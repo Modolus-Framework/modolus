@@ -91,7 +91,7 @@ public final class CommandParameters {
     }
 
     private static @NotNull ParameterSpec getEntityStoreRefParameter() {
-        var type = ParameterizedTypeName.get(ClassName.get(UNIVERSE_PACKAGE, ENTITY_STORE_REF_TYPE_NAME), getEntityStoreType());
+        var type = ParameterizedTypeName.get(ClassName.get(COMPONENT_PACKAGE, ENTITY_STORE_REF_TYPE_NAME), getEntityStoreType());
         return ParameterSpec.builder(type, ENTITY_STORE_REF_PARAM_NAME)
                 .addAnnotation(NotNull.class)
                 .build();

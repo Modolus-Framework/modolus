@@ -6,6 +6,7 @@ import com.modolus.processor.ProcessorUtils;
 import com.modolus.processor.SharedContext;
 import com.modolus.processor.SourceFileWriter;
 import com.modolus.util.singleton.Singleton;
+import com.modolus.util.singleton.SingletonScope;
 import com.modolus.util.singleton.Singletons;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class ProvideSingletonProcessor extends Processor {
 
     private static final ClassName SINGLETONS_CLASS_NAME = ClassName.get(Singletons.class);
+    private static final ClassName SINGLETON_SCOPE_CLASS_NAME = ClassName.get(SingletonScope.class);
     private static final String REGISTER_SINGLETON_FUNCTION = "provideSingleton";
 
     public ProvideSingletonProcessor(ProcessingEnvironment processingEnv) {
@@ -56,26 +58,30 @@ public class ProvideSingletonProcessor extends Processor {
             processingEnv.getMessager().printError("Is not a subtype of " + type, element);
         }
 
-        if (singleton.singletonIdentifier().isBlank()) return registerSingletonCodeBlockWithoutCustomIdentifier(type, element);
-        return registerSingletonCodeBlockWithCustomIdentifier(type, element, singleton.singletonIdentifier());
+        if (singleton.singletonIdentifier().isBlank())
+            return registerSingletonCodeBlockWithoutCustomIdentifier(type, element, singleton.scope());
+        return registerSingletonCodeBlockWithCustomIdentifier(type, element, singleton.singletonIdentifier(), singleton.scope());
     }
 
-    private @NotNull CodeBlock registerSingletonCodeBlockWithCustomIdentifier(TypeMirror type,
+    private @NotNull CodeBlock registerSingletonCodeBlockWithCustomIdentifier(@NotNull TypeMirror type,
                                                                               @NotNull Element element,
-                                                                              @NotNull String identifier) {
+                                                                              @NotNull String identifier,
+                                                                              @NotNull SingletonScope scope) {
         if (processingEnv.getTypeUtils().isSameType(type, element.asType()))
-            return CodeBlock.of("$T.$L(this, $S).orElseThrow()", SINGLETONS_CLASS_NAME, REGISTER_SINGLETON_FUNCTION, identifier);
+            return CodeBlock.of("$T.$L(this, $S, $T.$L).orElseThrow()", SINGLETONS_CLASS_NAME, REGISTER_SINGLETON_FUNCTION, identifier, SINGLETON_SCOPE_CLASS_NAME, scope.name());
 
 
-        return CodeBlock.of("$T.$L($T.class, this, $S).orElseThrow()", SINGLETONS_CLASS_NAME, REGISTER_SINGLETON_FUNCTION, type, identifier);
+        return CodeBlock.of("$T.$L($T.class, this, $S, $T.$L).orElseThrow()", SINGLETONS_CLASS_NAME, REGISTER_SINGLETON_FUNCTION, type, identifier, SINGLETON_SCOPE_CLASS_NAME, scope.name());
     }
 
-    private @NotNull CodeBlock registerSingletonCodeBlockWithoutCustomIdentifier(TypeMirror type, @NotNull Element element) {
+    private @NotNull CodeBlock registerSingletonCodeBlockWithoutCustomIdentifier(@NotNull TypeMirror type,
+                                                                                 @NotNull Element element,
+                                                                                 @NotNull SingletonScope scope) {
         if (processingEnv.getTypeUtils().isSameType(type, element.asType()))
-            return CodeBlock.of("$T.$L(this).orElseThrow()", SINGLETONS_CLASS_NAME, REGISTER_SINGLETON_FUNCTION);
+            return CodeBlock.of("$T.$L(this, $T.$L).orElseThrow()", SINGLETONS_CLASS_NAME, REGISTER_SINGLETON_FUNCTION, SINGLETON_SCOPE_CLASS_NAME, scope.name());
 
 
-        return CodeBlock.of("$T.$L($T.class, this).orElseThrow()", SINGLETONS_CLASS_NAME, REGISTER_SINGLETON_FUNCTION, type);
+        return CodeBlock.of("$T.$L($T.class, this, $T.$L).orElseThrow()", SINGLETONS_CLASS_NAME, REGISTER_SINGLETON_FUNCTION, type, SINGLETON_SCOPE_CLASS_NAME, scope.name());
     }
 
 }

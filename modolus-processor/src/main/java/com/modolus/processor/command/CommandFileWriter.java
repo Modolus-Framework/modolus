@@ -59,7 +59,7 @@ public final class CommandFileWriter {
                 .toList();
 
         var callAbstractMethod = CodeBlock.builder()
-                .add("return execute(")
+                .add("return executeCommand(")
                 .add(CodeBlock.join(params, ", "))
                 .add(");");
 

@@ -8,8 +8,4 @@ public interface Singleton {
     default void onDestruction() {
     }
 
-    default void destruct() {
-        Singletons.destructSingleton(this);
-    }
-
 }

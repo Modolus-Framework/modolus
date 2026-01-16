@@ -113,6 +113,12 @@ public class Result<T, E> {
         return success(mapper.apply(value));
     }
 
+    public @NotNull Result<Void, E> map(Consumer<T> mapper) {
+        if (isFailure()) return failure(error);
+        mapper.accept(value);
+        return success();
+    }
+
     public <O, X extends Exception> @NotNull Result<O, E> mapException(ExceptionFunction<T, @NotNull O, X> mapper,
                                                                        Function<X, @NotNull E> failureMapper,
                                                                        Class<X> exceptionClass) {
@@ -141,6 +147,11 @@ public class Result<T, E> {
     public @NotNull Result<T, E> recover(Function<E, @NotNull T> mapper) {
         if (isSuccess()) return this;
         return success(mapper.apply(error));
+    }
+
+    public @NotNull Result<T, E> recoverFlat(Function<E, @NotNull Result<T, E>> mapper) {
+        if (isSuccess()) return this;
+        return mapper.apply(error);
     }
 
     public @NotNull Result<T, GenericError> recoverNullable(Function<E, @Nullable T> mapper) {

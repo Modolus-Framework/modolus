@@ -6,6 +6,7 @@ import com.modolus.processor.ProcessorUtils;
 import com.modolus.processor.SharedContext;
 import com.modolus.processor.SourceFileWriter;
 import com.modolus.util.singleton.Lazy;
+import com.modolus.util.singleton.SingletonScope;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class InjectSingletonProcessor extends Processor {
 
     private static final ClassName LAZY_CLASS_NAME = ClassName.get(Lazy.class);
+    private static final ClassName SINGLETON_SCOPE_CLASS_NAME = ClassName.get(SingletonScope.class);
 
     public InjectSingletonProcessor(ProcessingEnvironment processingEnv) {
         super(processingEnv);
@@ -54,8 +56,8 @@ public class InjectSingletonProcessor extends Processor {
         var builder = FieldSpec.builder(lazyType, name)
                 .addModifiers(Modifier.PROTECTED, Modifier.FINAL);
 
-        if (singleton.fieldName().isBlank()) builder.initializer("new $T($T.class)", lazyType, type);
-        else builder.initializer("new $T($T.class, $S)", lazyType, type, singleton.singletonIdentifier());
+        if (singleton.fieldName().isBlank()) builder.initializer("new $T($T.class, $T.$L)", lazyType, type, SINGLETON_SCOPE_CLASS_NAME, singleton.scope().name());
+        else builder.initializer("new $T($T.class, $T.$L, $S)", lazyType, type, singleton.singletonIdentifier(), SINGLETON_SCOPE_CLASS_NAME, singleton.scope().name());
 
         return builder.build();
     }

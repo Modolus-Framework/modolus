@@ -3,6 +3,7 @@ package com.modolus.core.runtime;
 import com.modolus.core.logger.Logger;
 import com.modolus.util.result.Result;
 import com.modolus.util.singleton.Lazy;
+import com.modolus.util.singleton.SingletonScope;
 import com.modolus.util.singleton.Singletons;
 import lombok.experimental.UtilityClass;
 import tools.jackson.core.type.TypeReference;
@@ -18,7 +19,7 @@ import java.util.Set;
 public class Runtime {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final Lazy<Logger> LOGGER = new Lazy<>(Logger.class);
+    private static final Lazy<Logger> LOGGER = new Lazy<>(Logger.class, SingletonScope.ROOT);
 
     public static Result<Void, RuntimeError> initializeRuntime() {
         var classLoaderResult = getDefaultClassLoader();
