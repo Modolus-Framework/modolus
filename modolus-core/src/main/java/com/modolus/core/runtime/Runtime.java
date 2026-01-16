@@ -47,7 +47,7 @@ public class Runtime {
                 .tap(result -> printInfo("Found classes to initialize: " + String.join(",", result)))
                 .mapVoid(classes -> classes.parallelStream()
                         .map(Runtime::getClassByName)
-                        .peek(clazz -> printInfo("Found class " + clazz.get().getName()))
+                        .peek(result -> result.tap(clazz -> printInfo("Found class " + clazz.getName())))
                         .map(Runtime::constructClass)
                         .forEach(Runtime::logError))
                 .mapVoid(_ -> Singletons.initializeSingletons());

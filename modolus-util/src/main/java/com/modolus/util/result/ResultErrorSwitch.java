@@ -10,7 +10,6 @@ import java.util.function.Function;
 public class ResultErrorSwitch<A, B, Y> {
 
     private final Result<A, B> given;
-    private final boolean isSuccess;
     private Result<A, Y> result = null;
 
     public ResultErrorSwitch<A, B, Y> caseError(B expected, Y value) {
@@ -36,7 +35,7 @@ public class ResultErrorSwitch<A, B, Y> {
     }
 
     public Result<A, Y> finish() {
-        if (isSuccess) return Result.success(given.get());
+        if (given.isSuccess()) return Result.success(given.get());
 
         if (result == null)
             throw new UnsupportedOperationException("No case matched for error " + given.getError());

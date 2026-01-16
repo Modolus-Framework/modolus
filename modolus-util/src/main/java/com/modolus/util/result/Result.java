@@ -141,7 +141,7 @@ public class Result<T, E> {
     }
 
     public <X> @NotNull ResultErrorSwitch<T, E, X> switchMapError() {
-        return new ResultErrorSwitch<>(this, isSuccess());
+        return new ResultErrorSwitch<>(this);
     }
 
     public @NotNull Result<T, E> recover(Function<E, @NotNull T> mapper) {
