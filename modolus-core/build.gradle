@@ -7,5 +7,10 @@ dependencies {
     implementation 'tools.jackson.core:jackson-databind:3.0.3'
 
     testAnnotationProcessor project(":modolus-processor")
+}
 
+tasks.compileJava {
+    options.compilerArgs += [
+            "-AprojectVersion=1.0.0"
+    ]
 }

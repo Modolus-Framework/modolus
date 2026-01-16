@@ -4,6 +4,8 @@ import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.ShutdownReason;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
+import com.modolus.annotations.plugin.HytalePlugin;
+import com.modolus.annotations.plugin.PluginAuthor;
 import com.modolus.core.logger.Logger;
 import com.modolus.core.runtime.Runtime;
 import com.modolus.core.runtime.RuntimeError;
@@ -13,6 +15,19 @@ import com.modolus.util.singleton.SingletonScope;
 import com.modolus.util.singleton.Singletons;
 import org.jetbrains.annotations.NotNull;
 
+@HytalePlugin(
+        group = "com.modolus",
+        name = "modolus-core",
+        description = "A library plugin, which tries to reduce boilerplate and improve the developer experience",
+        authors = {
+                @PluginAuthor(
+                        name = "Louis Schmieder",
+                        email = "dev@louis-schmieder.de",
+                        url = "https://github.com/LouisSchmieder"
+                )
+        },
+        website = "https://github.com/Modolus-Framework/modolus"
+)
 public final class Plugin extends JavaPlugin implements Singleton {
 
     private final Lazy<Logger> logger = new Lazy<>(Logger.class, SingletonScope.ROOT);
@@ -24,7 +39,7 @@ public final class Plugin extends JavaPlugin implements Singleton {
     @Override
     protected void setup() {
         Logger.provideRootLogger(getLogger());
-        Singletons.provideSingleton(JavaPlugin.class, this, "modolus-core", SingletonScope.ROOT);
+        Singletons.provideSingleton(JavaPlugin.class, this, SingletonScope.ROOT);
         Runtime.initializeRuntime()
                 .onFailure(this::handleRuntimeInitializationError);
     }

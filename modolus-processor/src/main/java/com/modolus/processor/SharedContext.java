@@ -1,5 +1,7 @@
 package com.modolus.processor;
 
+import com.modolus.processor.manifest.PluginManifest;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -9,6 +11,7 @@ import java.util.Set;
 public record SharedContext(
         Map<String, Map<String, SourceFileWriter>> sourceFileWriters,
         Set<String> createOnRuntimeClasses,
-        Set<String> scopePackages
+        Set<String> scopePackages,
+        Holder<PluginManifest> pluginManifest
 ) {
 }
