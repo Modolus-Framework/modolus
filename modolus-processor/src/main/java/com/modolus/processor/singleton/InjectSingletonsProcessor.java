@@ -1,6 +1,6 @@
 package com.modolus.processor.singleton;
 
-import com.modolus.annotations.singleton.SingletonForCollection;
+import com.modolus.annotations.singleton.InjectSingletons;
 import com.modolus.processor.ProcessorUtils;
 import com.modolus.processor.SharedContext;
 import com.modolus.processor.SourceFileWriter;
@@ -11,9 +11,9 @@ import javax.lang.model.element.Element;
 import java.util.Arrays;
 import java.util.Map;
 
-public class SingletonForCollectionProcessor extends SingletonForProcessor {
+public class InjectSingletonsProcessor extends InjectSingletonProcessor {
 
-    public SingletonForCollectionProcessor(ProcessingEnvironment processingEnv) {
+    public InjectSingletonsProcessor(ProcessingEnvironment processingEnv) {
         super(processingEnv);
     }
 
@@ -22,19 +22,16 @@ public class SingletonForCollectionProcessor extends SingletonForProcessor {
                               String className,
                               Map<String, SourceFileWriter> writers,
                               @NotNull SharedContext sharedContext) {
-        var singletonForCollection = annotated.getAnnotation(SingletonForCollection.class);
-        assert singletonForCollection != null;
+        var singletonNeededCollection = annotated.getAnnotation(InjectSingletons.class);
+        assert singletonNeededCollection != null;
 
         ProcessorUtils.ensureBaseFileExists(writers, className, annotated);
 
         writers.values()
-                .forEach(sourceFileWriter -> {
-                    ensureImplementsSingleton(sourceFileWriter);
-                    Arrays.stream(singletonForCollection.value())
-                            .distinct()
-                            .map(singleton -> registerSingleton(annotated, singleton))
-                            .forEach(sourceFileWriter.getConstructor()::addStatement);
-                });
+                .forEach(sourceFileWriter -> Arrays.stream(singletonNeededCollection.value())
+                        .distinct()
+                        .map(this::addNeeded)
+                        .forEach(sourceFileWriter::addField));
     }
 
 }

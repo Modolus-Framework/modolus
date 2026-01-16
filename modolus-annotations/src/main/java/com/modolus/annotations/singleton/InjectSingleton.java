@@ -4,10 +4,14 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-@Repeatable(SingletonForCollection.class)
+@Repeatable(InjectSingletons.class)
 @Retention(RetentionPolicy.SOURCE)
-public @interface SingletonFor {
+public @interface InjectSingleton {
 
     Class<?> value();
+
+    String fieldName() default "";
+
+    String singletonIdentifier() default "";
 
 }

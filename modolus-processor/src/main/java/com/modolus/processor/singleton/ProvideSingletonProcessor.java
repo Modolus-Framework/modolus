@@ -1,6 +1,6 @@
 package com.modolus.processor.singleton;
 
-import com.modolus.annotations.singleton.SingletonFor;
+import com.modolus.annotations.singleton.ProvideSingleton;
 import com.modolus.processor.Processor;
 import com.modolus.processor.ProcessorUtils;
 import com.modolus.processor.SharedContext;
@@ -13,13 +13,15 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.type.TypeMirror;
 import java.util.Map;
 
-public class SingletonForProcessor extends Processor {
+public class ProvideSingletonProcessor extends Processor {
 
     private static final ClassName SINGLETONS_CLASS_NAME = ClassName.get(Singletons.class);
+    private static final String REGISTER_SINGLETON_FUNCTION = "provideSingleton";
 
-    public SingletonForProcessor(ProcessingEnvironment processingEnv) {
+    public ProvideSingletonProcessor(ProcessingEnvironment processingEnv) {
         super(processingEnv);
     }
 
@@ -28,7 +30,7 @@ public class SingletonForProcessor extends Processor {
                               String className,
                               Map<String, SourceFileWriter> writers,
                               @NotNull SharedContext sharedContext) {
-        var singletonFor = annotated.getAnnotation(SingletonFor.class);
+        var singletonFor = annotated.getAnnotation(ProvideSingleton.class);
         assert singletonFor != null;
 
         ProcessorUtils.ensureBaseFileExists(writers, className, annotated);
@@ -46,7 +48,7 @@ public class SingletonForProcessor extends Processor {
                 .addSuperinterface(ClassName.get(Singleton.class));
     }
 
-    protected CodeBlock registerSingleton(@NotNull Element element, @NotNull SingletonFor singleton) {
+    protected CodeBlock registerSingleton(@NotNull Element element, @NotNull ProvideSingleton singleton) {
         var type = ProcessorUtils.getTypeMirror(singleton::value);
         assert type != null;
 
@@ -54,11 +56,26 @@ public class SingletonForProcessor extends Processor {
             processingEnv.getMessager().printError("Is not a subtype of " + type, element);
         }
 
+        if (singleton.singletonIdentifier().isBlank()) return registerSingletonCodeBlockWithoutCustomIdentifier(type, element);
+        return registerSingletonCodeBlockWithCustomIdentifier(type, element, singleton.singletonIdentifier());
+    }
+
+    private @NotNull CodeBlock registerSingletonCodeBlockWithCustomIdentifier(TypeMirror type,
+                                                                              @NotNull Element element,
+                                                                              @NotNull String identifier) {
         if (processingEnv.getTypeUtils().isSameType(type, element.asType()))
-            return CodeBlock.of("$T.$L(this).orElseThrow()", SINGLETONS_CLASS_NAME, "registerSingleton");
+            return CodeBlock.of("$T.$L(this, $S).orElseThrow()", SINGLETONS_CLASS_NAME, REGISTER_SINGLETON_FUNCTION, identifier);
 
 
-        return CodeBlock.of("$T.$L($T.class, this).orElseThrow()", SINGLETONS_CLASS_NAME, "registerSingleton", type);
+        return CodeBlock.of("$T.$L($T.class, this, $S).orElseThrow()", SINGLETONS_CLASS_NAME, REGISTER_SINGLETON_FUNCTION, type, identifier);
+    }
+
+    private @NotNull CodeBlock registerSingletonCodeBlockWithoutCustomIdentifier(TypeMirror type, @NotNull Element element) {
+        if (processingEnv.getTypeUtils().isSameType(type, element.asType()))
+            return CodeBlock.of("$T.$L(this).orElseThrow()", SINGLETONS_CLASS_NAME, REGISTER_SINGLETON_FUNCTION);
+
+
+        return CodeBlock.of("$T.$L($T.class, this).orElseThrow()", SINGLETONS_CLASS_NAME, REGISTER_SINGLETON_FUNCTION, type);
     }
 
 }

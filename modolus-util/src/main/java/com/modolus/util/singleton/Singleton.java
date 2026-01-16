@@ -9,7 +9,7 @@ public interface Singleton {
     }
 
     default void destruct() {
-        Singletons.destructSingleton(this.getClass());
+        Singletons.destructSingleton(this);
     }
 
 }

@@ -1,6 +1,6 @@
 package com.modolus.processor.singleton;
 
-import com.modolus.annotations.singleton.SingletonNeeded;
+import com.modolus.annotations.singleton.InjectSingleton;
 import com.modolus.processor.Processor;
 import com.modolus.processor.ProcessorUtils;
 import com.modolus.processor.SharedContext;
@@ -18,11 +18,11 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import java.util.Map;
 
-public class SingletonNeededProcessor extends Processor {
+public class InjectSingletonProcessor extends Processor {
 
     private static final ClassName LAZY_CLASS_NAME = ClassName.get(Lazy.class);
 
-    public SingletonNeededProcessor(ProcessingEnvironment processingEnv) {
+    public InjectSingletonProcessor(ProcessingEnvironment processingEnv) {
         super(processingEnv);
     }
 
@@ -31,7 +31,7 @@ public class SingletonNeededProcessor extends Processor {
                               String className,
                               Map<String, SourceFileWriter> writers,
                               @NotNull SharedContext sharedContext) {
-        var singletonNeeded = annotated.getAnnotation(SingletonNeeded.class);
+        var singletonNeeded = annotated.getAnnotation(InjectSingleton.class);
         assert singletonNeeded != null;
 
         ProcessorUtils.ensureBaseFileExists(writers, className, annotated);
@@ -40,21 +40,24 @@ public class SingletonNeededProcessor extends Processor {
                 .forEach(sourceFileWriter -> sourceFileWriter.addField(addNeeded(singletonNeeded)));
     }
 
-    protected FieldSpec addNeeded(@NotNull SingletonNeeded singleton) {
+    protected FieldSpec addNeeded(@NotNull InjectSingleton singleton) {
         var type = ProcessorUtils.getTypeMirror(singleton::value);
         assert type != null;
 
-        var name = singleton.name();
+        var name = singleton.fieldName();
         if (name.isBlank()) {
             var simpleName = ProcessorUtils.getSimpleClassName(type.toString());
             name = CaseUtils.toCamelCase(simpleName, false);
         }
 
         var lazyType = ParameterizedTypeName.get(LAZY_CLASS_NAME, TypeName.get(type));
-        return FieldSpec.builder(lazyType, name)
-                .addModifiers(Modifier.PROTECTED, Modifier.FINAL)
-                .initializer("new $T($T.class)", lazyType, type)
-                .build();
+        var builder = FieldSpec.builder(lazyType, name)
+                .addModifiers(Modifier.PROTECTED, Modifier.FINAL);
+
+        if (singleton.fieldName().isBlank()) builder.initializer("new $T($T.class)", lazyType, type);
+        else builder.initializer("new $T($T.class, $S)", lazyType, type, singleton.singletonIdentifier());
+
+        return builder.build();
     }
 
 }

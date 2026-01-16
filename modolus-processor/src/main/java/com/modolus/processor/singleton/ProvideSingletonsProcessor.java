@@ -1,6 +1,6 @@
 package com.modolus.processor.singleton;
 
-import com.modolus.annotations.singleton.SingletonNeededCollection;
+import com.modolus.annotations.singleton.ProvideSingletons;
 import com.modolus.processor.ProcessorUtils;
 import com.modolus.processor.SharedContext;
 import com.modolus.processor.SourceFileWriter;
@@ -11,9 +11,9 @@ import javax.lang.model.element.Element;
 import java.util.Arrays;
 import java.util.Map;
 
-public class SingletonNeededCollectionProcessor extends SingletonNeededProcessor {
+public class ProvideSingletonsProcessor extends ProvideSingletonProcessor {
 
-    public SingletonNeededCollectionProcessor(ProcessingEnvironment processingEnv) {
+    public ProvideSingletonsProcessor(ProcessingEnvironment processingEnv) {
         super(processingEnv);
     }
 
@@ -22,16 +22,19 @@ public class SingletonNeededCollectionProcessor extends SingletonNeededProcessor
                               String className,
                               Map<String, SourceFileWriter> writers,
                               @NotNull SharedContext sharedContext) {
-        var singletonNeededCollection = annotated.getAnnotation(SingletonNeededCollection.class);
-        assert singletonNeededCollection != null;
+        var singletonForCollection = annotated.getAnnotation(ProvideSingletons.class);
+        assert singletonForCollection != null;
 
         ProcessorUtils.ensureBaseFileExists(writers, className, annotated);
 
         writers.values()
-                .forEach(sourceFileWriter -> Arrays.stream(singletonNeededCollection.value())
-                        .distinct()
-                        .map(this::addNeeded)
-                        .forEach(sourceFileWriter::addField));
+                .forEach(sourceFileWriter -> {
+                    ensureImplementsSingleton(sourceFileWriter);
+                    Arrays.stream(singletonForCollection.value())
+                            .distinct()
+                            .map(singleton -> registerSingleton(annotated, singleton))
+                            .forEach(sourceFileWriter.getConstructor()::addStatement);
+                });
     }
 
 }

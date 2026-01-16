@@ -21,10 +21,10 @@ import static com.modolus.processor.Annotations.*;
 
 @SupportedAnnotationTypes({
         COMMAND_ANNOTATION,
-        SINGLETON_FOR_COLLECTION_ANNOTATION,
-        SINGLETON_NEEDED_COLLECTION_ANNOTATION,
-        SINGLETON_FOR_ANNOTATION,
-        SINGLETON_NEEDED_ANNOTATION,
+        PROVIDE_SINGLETONS_ANNOTATION,
+        INJECT_SINGLETONS_ANNOTATION,
+        PROVIDE_SINGLETON_ANNOTATION,
+        INJECT_SINGLETON_ANNOTATION,
         CREATE_ON_RUNTIME_ANNOTATION
 })
 @SupportedSourceVersion(SourceVersion.RELEASE_25)
@@ -35,10 +35,10 @@ public class InstanceProcessor extends AbstractProcessor {
     );
 
     private static final List<String> MODIFIER_ANNOTATION = List.of(
-            SINGLETON_FOR_ANNOTATION,
-            SINGLETON_FOR_COLLECTION_ANNOTATION,
-            SINGLETON_NEEDED_ANNOTATION,
-            SINGLETON_NEEDED_COLLECTION_ANNOTATION,
+            PROVIDE_SINGLETON_ANNOTATION,
+            PROVIDE_SINGLETONS_ANNOTATION,
+            INJECT_SINGLETON_ANNOTATION,
+            INJECT_SINGLETONS_ANNOTATION,
             CREATE_ON_RUNTIME_ANNOTATION
     );
 
@@ -51,10 +51,10 @@ public class InstanceProcessor extends AbstractProcessor {
     public boolean process(@NotNull Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         Map<String, Processor> processors = Map.of(
                 COMMAND_ANNOTATION, new CommandProcessor(processingEnv),
-                SINGLETON_FOR_ANNOTATION, new SingletonForProcessor(processingEnv),
-                SINGLETON_FOR_COLLECTION_ANNOTATION, new SingletonForCollectionProcessor(processingEnv),
-                SINGLETON_NEEDED_ANNOTATION, new SingletonNeededProcessor(processingEnv),
-                SINGLETON_NEEDED_COLLECTION_ANNOTATION, new SingletonNeededCollectionProcessor(processingEnv),
+                PROVIDE_SINGLETON_ANNOTATION, new ProvideSingletonProcessor(processingEnv),
+                PROVIDE_SINGLETONS_ANNOTATION, new ProvideSingletonsProcessor(processingEnv),
+                INJECT_SINGLETON_ANNOTATION, new InjectSingletonProcessor(processingEnv),
+                INJECT_SINGLETONS_ANNOTATION, new InjectSingletonsProcessor(processingEnv),
                 CREATE_ON_RUNTIME_ANNOTATION, new CreateOnRuntimeProcessor(processingEnv)
         );
 
@@ -90,7 +90,7 @@ public class InstanceProcessor extends AbstractProcessor {
         for (var annotated : roundEnv.getElementsAnnotatedWith(annotation)) {
             String className = ((TypeElement) annotated).getQualifiedName().toString();
 
-            var writers = sharedContext.sourceFileWriters().computeIfAbsent(className, s -> new HashMap<>());
+            var writers = sharedContext.sourceFileWriters().computeIfAbsent(className, _ -> new HashMap<>());
             processor.processSingle(annotated, className, writers, sharedContext);
         }
     }

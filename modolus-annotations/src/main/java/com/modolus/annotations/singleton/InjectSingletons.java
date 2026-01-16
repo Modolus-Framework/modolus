@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
-public @interface SingletonForCollection {
+public @interface InjectSingletons {
 
-    SingletonFor[] value();
+    InjectSingleton[] value();
 
 }

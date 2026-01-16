@@ -4,12 +4,12 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-@Repeatable(SingletonNeededCollection.class)
+@Repeatable(ProvideSingletons.class)
 @Retention(RetentionPolicy.SOURCE)
-public @interface SingletonNeeded {
+public @interface ProvideSingleton {
 
     Class<?> value();
 
-    String name() default "";
+    String singletonIdentifier() default "";
 
 }

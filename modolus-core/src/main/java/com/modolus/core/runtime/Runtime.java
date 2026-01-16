@@ -1,6 +1,8 @@
 package com.modolus.core.runtime;
 
+import com.modolus.core.logger.Logger;
 import com.modolus.util.result.Result;
+import com.modolus.util.singleton.Lazy;
 import com.modolus.util.singleton.Singletons;
 import lombok.experimental.UtilityClass;
 import tools.jackson.core.type.TypeReference;
@@ -16,6 +18,7 @@ import java.util.Set;
 public class Runtime {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final Lazy<Logger> LOGGER = new Lazy<>(Logger.class);
 
     public static Result<Void, RuntimeError> initializeRuntime() {
         var classLoaderResult = getDefaultClassLoader();
@@ -25,7 +28,7 @@ public class Runtime {
 
         var classLoader = classLoaderResult.orElseThrow();
         var filesResult = Result.ofException(() -> classLoader.getResources("runtime-classes.json"), IOException.class)
-                .mapError(error -> RuntimeError.FAILED_TO_LOAD_RESOURCES);
+                .mapError(_ -> RuntimeError.FAILED_TO_LOAD_RESOURCES);
 
         if (filesResult.isFailure()) {
             return Result.failure(filesResult.getError());
@@ -42,9 +45,9 @@ public class Runtime {
 
         classes.orElseThrow().parallelStream()
                 .map(file -> Result.ofException(() -> Class.forName(file), ClassNotFoundException.class))
-                .map(result -> result.mapError(err -> RuntimeError.FAILED_TO_LOAD_CLASS))
-                .map(result -> result.mapException(Runtime::constructClass, err -> RuntimeError.FAILED_TO_CREATE_CLASS, ReflectiveOperationException.class))
-                .forEach(result -> result.onFailure(System.out::println));
+                .map(result -> result.mapError(_ -> RuntimeError.FAILED_TO_LOAD_CLASS))
+                .map(result -> result.mapException(Runtime::constructClass, _ -> RuntimeError.FAILED_TO_CREATE_CLASS, ReflectiveOperationException.class))
+                .forEach(result -> result.mapError(RuntimeError::name).onFailure(LOGGER.getOrThrow().atWarning()::log));
 
         Singletons.initializeSingletons();
 
@@ -73,10 +76,10 @@ public class Runtime {
 
     private static Result<ClassLoader, RuntimeError> getDefaultClassLoader() {
         return Result.ofNullableWithException(() -> Thread.currentThread().getContextClassLoader(), Exception.class)
-                .tryRecoverNullable(error -> Runtime.class.getClassLoader(), Exception.class)
-                .recoverNullable(error -> ClassLoader.getSystemClassLoader())
-                .tryRecoverNullable(error -> ClassLoader.getSystemClassLoader(), Exception.class)
-                .mapError(genericError -> RuntimeError.NO_AVAILABLE_CLASS_LOADER);
+                .tryRecoverNullable(_ -> Runtime.class.getClassLoader(), Exception.class)
+                .recoverNullable(_ -> ClassLoader.getSystemClassLoader())
+                .tryRecoverNullable(_ -> ClassLoader.getSystemClassLoader(), Exception.class)
+                .mapError(_ -> RuntimeError.NO_AVAILABLE_CLASS_LOADER);
     }
 
 }
