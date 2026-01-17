@@ -1,6 +1,7 @@
 package com.modolus.core.logger;
 
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.modolus.util.singleton.Lazy;
 import com.modolus.util.singleton.Singleton;
 import com.modolus.util.singleton.SingletonScope;
 import com.modolus.util.singleton.Singletons;
@@ -13,6 +14,14 @@ import java.util.logging.Level;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Logger implements Singleton {
+
+    public static Lazy<Logger> getPluginLogger() {
+        return Lazy.ofPlugin(Logger.class);
+    }
+
+    public static Lazy<Logger> getRootLogger() {
+        return Lazy.ofRoot(Logger.class);
+    }
 
     private final HytaleLogger hytaleLogger;
 

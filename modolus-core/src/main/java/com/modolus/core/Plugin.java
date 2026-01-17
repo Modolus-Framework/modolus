@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 )
 public final class Plugin extends JavaPlugin implements Singleton {
 
-    private final Lazy<Logger> logger = new Lazy<>(Logger.class, SingletonScope.ROOT);
+    private final Lazy<Logger> logger = Logger.getRootLogger();
 
     public Plugin(@NotNull JavaPluginInit init) {
         super(init);

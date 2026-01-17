@@ -20,7 +20,7 @@ import java.util.Set;
 public class Runtime {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final Lazy<Logger> LOGGER = new Lazy<>(Logger.class, SingletonScope.ROOT);
+    private static final Lazy<Logger> LOGGER = Logger.getRootLogger();
 
     public static Result<Void, RuntimeError> initializeRuntime() {
         var classLoaderResult = getDefaultClassLoader();

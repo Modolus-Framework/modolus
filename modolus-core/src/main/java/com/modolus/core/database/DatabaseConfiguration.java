@@ -24,7 +24,7 @@ public class DatabaseConfiguration extends AbstractConfiguration<DatabaseConfigu
     private final Lazy<Database> database;
 
     @JsonIgnore
-    private final Lazy<Logger> logger = new Lazy<>(Logger.class, SingletonScope.PLUGIN);
+    private final Lazy<Logger> logger = Logger.getPluginLogger();
 
     private String jdbcUrl = "jdbc:sqlite:test.db";
 
@@ -49,7 +49,7 @@ public class DatabaseConfiguration extends AbstractConfiguration<DatabaseConfigu
     protected DatabaseConfiguration(SingletonScope scope, @Nullable String databaseSingletonIdentifier) {
         super(DatabaseConfiguration.class);
         this.scope = scope;
-        this.database = databaseSingletonIdentifier == null ? new Lazy<>(Database.class, scope) : new Lazy<>(Database.class, scope, databaseSingletonIdentifier);
+        this.database = databaseSingletonIdentifier == null ? Lazy.of(Database.class, scope) : Lazy.of(Database.class, scope, databaseSingletonIdentifier);
     }
 
     @Override

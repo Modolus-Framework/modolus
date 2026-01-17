@@ -14,7 +14,7 @@ import java.util.logging.Level;
 @CreateOnRuntime
 public class ModolusConfiguration extends AbstractConfiguration<ModolusConfiguration> {
 
-    private static final Lazy<Logger> LOGGER = new Lazy<>(Logger.class, SingletonScope.ROOT);
+    private static final Lazy<Logger> LOGGER = Logger.getRootLogger();
 
     public ModolusConfiguration() {
         super(ModolusConfiguration.class, SingletonScope.ROOT);

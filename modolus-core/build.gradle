@@ -5,6 +5,7 @@ dependencies {
 
     implementation "tools.jackson.core:jackson-core:3.0.3"
     implementation 'tools.jackson.core:jackson-databind:3.0.3'
+    implementation 'com.zaxxer:HikariCP:7.0.2'
 
     testAnnotationProcessor project(":modolus-processor")
 }

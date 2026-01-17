@@ -19,10 +19,10 @@ import java.nio.file.Path;
 public abstract class AbstractConfiguration<T extends AbstractConfiguration<T>> implements Singleton {
 
     @JsonIgnore
-    private final Lazy<JavaPlugin> plugin = new Lazy<>(JavaPlugin.class, SingletonScope.PLUGIN);
+    private final Lazy<JavaPlugin> plugin = Lazy.ofPlugin(JavaPlugin.class);
 
     @JsonIgnore
-    private final Lazy<Logger> logger = new Lazy<>(Logger.class, SingletonScope.PLUGIN);
+    private final Lazy<Logger> logger = Logger.getPluginLogger();
 
     @JsonIgnore
     private final ObjectMapper objectMapper = new ObjectMapper();
