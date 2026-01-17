@@ -17,7 +17,7 @@ public class ResultErrorSwitch<A, B, Y> {
     }
 
     public ResultErrorSwitch<A, B, Y> caseError(B expected, Function<B, Y> mapper) {
-        if (given.isFailure() && Objects.requireNonNull(given.getError()).equals(expected)) {
+        if (given.isFailure() && Objects.equals(given.getError(), expected)) {
             result = Result.failure(mapper.apply(expected));
         }
         return this;
@@ -27,9 +27,9 @@ public class ResultErrorSwitch<A, B, Y> {
         return otherwise(unused -> value);
     }
 
-    public ResultErrorSwitch<A, B, Y> otherwise(Function<B, Y> value) {
+    public ResultErrorSwitch<A, B, Y> otherwise(Function<B, Y> mapper) {
         if (given.isFailure()) {
-            result = Result.failure(value.apply(given.getError()));
+            result = Result.failure(mapper.apply(given.getError()));
         }
         return this;
     }

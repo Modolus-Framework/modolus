@@ -36,8 +36,8 @@ public class PluginManifestConverter {
 
     private static @NotNull Map<String, String> convertDependencies(PluginDependency[] dependencies) {
         return Arrays.stream(dependencies)
-                .map(dp -> new AbstractMap.SimpleEntry<>(dp.name(), dp.version()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .map(dependency -> new AbstractMap.SimpleEntry<>(dependency.name(), dependency.version()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, _) -> existing));
     }
 
     private static @NotNull PluginManifestAuthor fromAnnotation(@NotNull PluginAuthor author) {

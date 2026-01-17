@@ -30,7 +30,7 @@ public class Result<T, E> {
     }
 
     @Contract(value = "_ -> new", pure = true)
-    public static <T, E> @NotNull Result<T, E> failure(E error) {
+    public static <T, E> @NotNull Result<T, E> failure(@NotNull E error) {
         return new Result<>(null, error);
     }
 
@@ -67,7 +67,7 @@ public class Result<T, E> {
     }
 
     public static <T> Result<T, IllegalStateException> ofOptional(@NotNull Optional<T> optional) {
-        return optional.<Result<T, IllegalStateException>>map(Result::success).orElseGet(() -> failure(new IllegalStateException("Optional was empty.")));
+        return optional.<Result<T, IllegalStateException>>map(Result::success).orElseGet(() -> failure(new IllegalStateException("Expected Optional to contain a value, but it was empty.")));
     }
 
     public static <T extends Collection<E>, E> Result<T, GenericError> ofPossibleEmpty(@NotNull T collection) {
@@ -98,7 +98,8 @@ public class Result<T, E> {
         if (isSuccess()) {
             return value;
         }
-        throw new IllegalStateException(error.toString());
+        var message = String.valueOf(error);
+        throw new IllegalStateException(message);
     }
 
     public <X extends Throwable> T orElseThrow(@NotNull X exception) throws X {
@@ -182,7 +183,7 @@ public class Result<T, E> {
         return failure(errorMapper.apply(error));
     }
 
-    public Result<T, E> tap(Consumer<T> consumer) {
+    public @NotNull Result<T, E> tap(Consumer<T> consumer) {
         onSuccess(consumer);
         return this;
     }
@@ -197,7 +198,9 @@ public class Result<T, E> {
 
     @Override
     public @NotNull String toString() {
-        return isSuccess() ? String.format("Success(%s)", value.toString()) : String.format("Failure(%s)", error.toString());
+        return isSuccess()
+                ? String.format("Success(%s)", value)
+                : String.format("Failure(%s)", error);
     }
 
     @Override
