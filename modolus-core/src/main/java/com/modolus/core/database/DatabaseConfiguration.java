@@ -34,13 +34,13 @@ public class DatabaseConfiguration extends AbstractConfiguration<DatabaseConfigu
 
     private Map<String, String> dataSourceProperties = Map.of();
 
-    private int connectionTimeout = 30000;
+    private int connectionTimeout = 30_000;
 
-    private int idleTimeout = 600000;
+    private int idleTimeout = 600_000;
 
-    private int keepAliveTime = 300000;
+    private int keepAliveTime = 300_000;
 
-    private int maxLifetime = 1800000;
+    private int maxLifetime = 1_800_000;
 
     private int minimumIdle = 10;
 
