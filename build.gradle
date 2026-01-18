@@ -106,7 +106,7 @@ idea.project.settings.runConfigurations {
 }
 
 static GString getHytaleServerPath(propertiesFile) {
-    if (System.getenv("SKIP_SERVER_TASK") != null) return "" as GString
+    if (System.getenv("SKIP_SERVER_TASK") != null) return GString.EMPTY
 
     if (!propertiesFile.exists()) {
         if (!propertiesFile.createNewFile()) {
@@ -133,7 +133,7 @@ static GString getHytaleServerPath(propertiesFile) {
 }
 
 static GString getHytaleAssetsPath(propertiesFile) {
-    if (System.getenv("SKIP_SERVER_TASK") != null) return "" as GString
+    if (System.getenv("SKIP_SERVER_TASK") != null) return GString.EMPTY
 
     if (!propertiesFile.exists()) {
         if (!propertiesFile.createNewFile()) {
