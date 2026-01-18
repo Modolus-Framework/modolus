@@ -24,24 +24,24 @@ public final class RootSingletonManager extends ScopedSingletonManager {
         super("ROOT");
     }
 
-    public <T extends Singleton> @NotNull Result<Singleton, SingletonError> provideSingletonInPluginScope(@NotNull T value) {
+    public <T extends Singleton> @NotNull Result<T, SingletonError> provideSingletonInPluginScope(@NotNull T value) {
         return getCallersScopeManager()
                 .flatMap(manager -> manager.provideSingleton(value));
     }
 
-    public <T extends Singleton> @NotNull Result<Singleton, SingletonError> provideSingletonInPluginScope(@NotNull T value,
+    public <T extends Singleton> @NotNull Result<T, SingletonError> provideSingletonInPluginScope(@NotNull T value,
                                                                                                           @NotNull String singletonIdentifier) {
         return getCallersScopeManager()
                 .flatMap(manager -> manager.provideSingleton(value, singletonIdentifier));
     }
 
-    public <I, T extends I> @NotNull Result<Singleton, SingletonError> provideSingletonInPluginScope(Class<? extends I> forType,
+    public <I, T extends I> @NotNull Result<T, SingletonError> provideSingletonInPluginScope(Class<? extends I> forType,
                                                                                                      T value) {
         return getCallersScopeManager()
                 .flatMap(manager -> manager.provideSingleton(forType, value));
     }
 
-    public <I, T extends I> @NotNull Result<Singleton, SingletonError> provideSingletonInPluginScope(Class<? extends I> forType,
+    public <I, T extends I> @NotNull Result<T, SingletonError> provideSingletonInPluginScope(Class<? extends I> forType,
                                                                                                      T value,
                                                                                                      String singletonIdentifier) {
         return getCallersScopeManager()
@@ -84,9 +84,10 @@ public final class RootSingletonManager extends ScopedSingletonManager {
     }
 
     @Override
-    public void destructSingletons() {
-        scopes.forEach((_, manager) -> manager.destructSingletons());
-        super.destructSingletons();
+    public @NotNull Result<String, SingletonError> destructSingletons() {
+        return getCallersScopeManager()
+                .flatMap(ScopedSingletonManager::destructSingletons)
+                .recoverFlat(_ -> super.destructSingletons());
     }
 
     @Override

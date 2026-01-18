@@ -5,12 +5,13 @@ import com.modolus.annotations.config.Config;
 import com.modolus.core.config.AbstractConfiguration;
 import com.modolus.core.logger.Logger;
 import com.modolus.core.logger.LoggerUtils;
-import com.modolus.util.singleton.Lazy;
-import com.modolus.util.singleton.SingletonScope;
-import com.modolus.util.singleton.Singletons;
+import com.modolus.util.result.Result;
+import com.modolus.util.singleton.*;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Map;
 
@@ -22,10 +23,13 @@ public class DatabaseConfiguration extends AbstractConfiguration<DatabaseConfigu
     private final SingletonScope scope;
 
     @JsonIgnore
-    private final Lazy<Database> database;
+    private final ExactScopedLazy<Database> database;
 
     @JsonIgnore
     private final Lazy<Logger> logger = Logger.getPluginLogger();
+
+    @JsonIgnore
+    private String migrationPath = null;
 
     private String jdbcUrl = "jdbc:sqlite:test.db";
 
@@ -48,11 +52,12 @@ public class DatabaseConfiguration extends AbstractConfiguration<DatabaseConfigu
     private int maximumPoolSize = 10;
 
     protected DatabaseConfiguration(SingletonScope scope, @Nullable String databaseSingletonIdentifier) {
-        super(DatabaseConfiguration.class, scope);
+        super(DatabaseConfiguration.class, scope, false);
+
         this.scope = scope;
         this.database = databaseSingletonIdentifier == null
-                ? Lazy.of(Database.class, scope)
-                : Lazy.of(Database.class, scope, databaseSingletonIdentifier);
+                ? ExactScopedLazy.of(Database.class, scope)
+                : ExactScopedLazy.of(Database.class, scope, databaseSingletonIdentifier);
     }
 
     @Override
@@ -61,30 +66,44 @@ public class DatabaseConfiguration extends AbstractConfiguration<DatabaseConfigu
         database.get().onSuccess(db -> db.updateConfiguration(this));
     }
 
-    public static void provideDatabaseConfiguration() {
-        provideDatabaseConfiguration(SingletonScope.PLUGIN);
+    public void withMigrations(String migrationPath) {
+        this.migrationPath = migrationPath;
     }
 
-    public static void provideDatabaseConfiguration(String databaseSingletonIdentifier) {
-        provideDatabaseConfiguration(SingletonScope.PLUGIN, databaseSingletonIdentifier);
+    public static @NotNull @Unmodifiable Result<DatabaseConfiguration, SingletonError> provideDatabaseConfiguration() {
+        return provideDatabaseConfiguration(SingletonScope.PLUGIN);
+    }
+
+    public static @NotNull @Unmodifiable Result<DatabaseConfiguration, SingletonError> provideDatabaseConfiguration(
+            String databaseSingletonIdentifier) {
+        return provideDatabaseConfiguration(SingletonScope.PLUGIN, databaseSingletonIdentifier);
     }
 
     @ApiStatus.Internal
-    public static void provideDatabaseConfiguration(SingletonScope scope) {
-        provideDatabaseConfiguration(scope, null);
+    public static @NotNull @Unmodifiable Result<DatabaseConfiguration, SingletonError> provideDatabaseConfiguration(
+            SingletonScope scope) {
+        return Singletons.provideSingleton(new Database(), scope)
+                .flatMap(_ -> Singletons.provideSingleton(new DatabaseConfiguration(scope, null), scope));
     }
 
     @ApiStatus.Internal
-    public static void provideDatabaseConfiguration(SingletonScope scope, String databaseSingletonIdentifier) {
-        Singletons.provideSingleton(new DatabaseConfiguration(scope, databaseSingletonIdentifier), scope);
+    public static @NotNull @Unmodifiable Result<DatabaseConfiguration, SingletonError> provideDatabaseConfiguration(
+            SingletonScope scope, @NotNull String databaseSingletonIdentifier) {
+        return Singletons.provideSingleton(new Database(), databaseSingletonIdentifier, scope)
+                .flatMap(_ -> Singletons.provideSingleton(new DatabaseConfiguration(scope, databaseSingletonIdentifier), scope));
     }
 
-    public static void provideDatabaseConfiguration(String singletonIdentifier, SingletonScope scope) {
-        provideDatabaseConfiguration(singletonIdentifier, scope, null);
+    public static @NotNull @Unmodifiable Result<DatabaseConfiguration, SingletonError> provideDatabaseConfiguration(
+            String singletonIdentifier, SingletonScope scope) {
+        return Singletons.provideSingleton(new Database(), scope)
+                .flatMap(_ -> Singletons.provideSingleton(new DatabaseConfiguration(scope, null), singletonIdentifier, scope));
+
     }
 
-    public static void provideDatabaseConfiguration(String singletonIdentifier, SingletonScope scope, String databaseSingletonIdentifier) {
-        Singletons.provideSingleton(new DatabaseConfiguration(scope, databaseSingletonIdentifier), singletonIdentifier, scope);
+    public static @NotNull @Unmodifiable Result<DatabaseConfiguration, SingletonError> provideDatabaseConfiguration(
+            @NotNull String singletonIdentifier, SingletonScope scope, @NotNull String databaseSingletonIdentifier) {
+        return Singletons.provideSingleton(new Database(), databaseSingletonIdentifier, scope)
+                .flatMap(_ -> Singletons.provideSingleton(new DatabaseConfiguration(scope, databaseSingletonIdentifier), singletonIdentifier, scope));
     }
 
 }

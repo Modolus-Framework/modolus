@@ -24,11 +24,11 @@ public sealed class ScopedSingletonManager permits RootSingletonManager {
     private final String scopeName;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
-    public <T extends Singleton> Result<Singleton, SingletonError> provideSingleton(@NotNull T value) {
+    public <T extends Singleton> Result<T, SingletonError> provideSingleton(@NotNull T value) {
         return provideSingleton(value, getDefaultSingletonNameFor(value.getClass()));
     }
 
-    public <T extends Singleton> Result<Singleton, SingletonError> provideSingleton(@NotNull T value,
+    public <T extends Singleton> Result<T, SingletonError> provideSingleton(@NotNull T value,
                                                                                     @NotNull String singletonIdentifier) {
         var map = singletonHolder.computeIfAbsent(value.getClass(), _ -> new HashMap<>());
         if (map.containsKey(singletonIdentifier))
@@ -37,12 +37,12 @@ public sealed class ScopedSingletonManager permits RootSingletonManager {
         return Result.success(value);
     }
 
-    public <I, T extends I> Result<Singleton, SingletonError> provideSingleton(Class<? extends I> forType,
+    public <I, T extends I> Result<T, SingletonError> provideSingleton(Class<? extends I> forType,
                                                                                T value) {
         return provideSingleton(forType, value, getDefaultSingletonNameFor(forType));
     }
 
-    public <I, T extends I> Result<Singleton, SingletonError> provideSingleton(Class<? extends I> forType,
+    public <I, T extends I> Result<T, SingletonError> provideSingleton(Class<? extends I> forType,
                                                                                T value,
                                                                                String singletonIdentifier) {
         if (!(value instanceof Singleton singleton)) {
@@ -53,7 +53,7 @@ public sealed class ScopedSingletonManager permits RootSingletonManager {
         if (map.containsKey(singletonIdentifier))
             return Result.failure(SingletonError.SINGLETON_ALREADY_PROVIDED);
         map.put(singletonIdentifier, singleton);
-        return Result.success(singleton);
+        return Result.success(value);
     }
 
     public Result<String, SingletonError> initializeSingletons() {
@@ -101,12 +101,13 @@ public sealed class ScopedSingletonManager permits RootSingletonManager {
         return CaseUtils.toCamelCase(clazz.getSimpleName(), false);
     }
 
-    public void destructSingletons() {
+    public Result<String, SingletonError> destructSingletons() {
         singletonHolder.values().stream()
                 .map(Map::values)
                 .flatMap(Collection::stream)
                 .forEach(Singleton::onDestruction);
         singletonHolder.clear();
+        return Result.success(scopeName);
     }
 
     public void debugSingletons(@NotNull Consumer<String> messageSender) {

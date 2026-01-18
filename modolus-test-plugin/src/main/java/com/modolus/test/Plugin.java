@@ -1,19 +1,15 @@
 package com.modolus.test;
 
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
-import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.modolus.annotations.plugin.HytalePlugin;
 import com.modolus.annotations.plugin.PluginAuthor;
 import com.modolus.annotations.plugin.PluginDependency;
 import com.modolus.annotations.singleton.Scope;
+import com.modolus.core.BasePlugin;
+import com.modolus.core.database.DatabaseConfiguration;
 import com.modolus.core.logger.Logger;
 import com.modolus.core.logger.LoggerUtils;
-import com.modolus.core.runtime.Runtime;
-import com.modolus.util.singleton.LazySet;
-import com.modolus.util.singleton.Singleton;
-import com.modolus.util.singleton.SingletonScope;
-import com.modolus.util.singleton.Singletons;
 import org.jetbrains.annotations.NotNull;
 
 @HytalePlugin(
@@ -36,28 +32,34 @@ import org.jetbrains.annotations.NotNull;
         }
 )
 @Scope
-public class Plugin extends JavaPlugin implements Singleton {
+public class Plugin extends BasePlugin {
 
     public Plugin(@NotNull JavaPluginInit init) {
         super(init);
     }
 
     @Override
-    protected void setup() {
-        Logger.providePluginLogger(getLogger());
-        Singletons.provideSingleton(JavaPlugin.class, this, SingletonScope.PLUGIN).orElseThrow();
-
-        Runtime.requireSuccess(Runtime.initializeCurrentScope());
-
-        LoggerUtils.printInfo(Logger.getPluginLogger(), "Test Plugin loaded");
-
-        LazySet.ofPlugin(AbstractCommand.class).get()
-                .mapVoid(commands -> commands.forEach(command -> {
-                    getCommandRegistry().registerCommand(command);
-                    LoggerUtils.printInfo(Logger.getPluginLogger(), String.format("Registered command %s", command.getClass().getSimpleName()));
-                }))
-                .onFailure(err -> LoggerUtils.printError(Logger.getPluginLogger(), String.format("Failed to get commands with error: %s", err.name())));
-
+    protected void initializeManualDependencies() {
+        var data = DatabaseConfiguration.provideDatabaseConfiguration();
+        data.onFailure(e -> LoggerUtils.printError(Logger.getPluginLogger(), "Failed to initialize database: " + e.name()));
+        data
+                .onSuccess(config -> config.withMigrations("test/migrations"));
     }
 
+    @Override
+    protected void setup() {
+        setupPlugin();
+        registerCommands();
+    }
+
+    @Override
+    protected void shutdown() {
+        shutdownPlugin();
+    }
+
+    @Override
+    protected void registerCommand(AbstractCommand command) {
+        super.registerCommand(command);
+        LoggerUtils.printInfo(Logger.getPluginLogger(), String.format("Registered command %s", command.getClass().getSimpleName()));
+    }
 }

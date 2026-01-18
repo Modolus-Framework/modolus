@@ -27,8 +27,8 @@ public final class Logger implements Singleton {
 
     private Logger(HytaleLogger hytaleLogger, String singletonIdentifier, SingletonScope scope) {
         this(hytaleLogger);
-        if (singletonIdentifier == null) Singletons.provideSingleton(this, scope);
-        else Singletons.provideSingleton(this, singletonIdentifier, scope);
+        if (singletonIdentifier == null) Singletons.provideSingleton(this, scope).orElseThrow();
+        else Singletons.provideSingleton(this, singletonIdentifier, scope).orElseThrow();
     }
 
     public static void providePluginLogger(@NotNull HytaleLogger logger) {

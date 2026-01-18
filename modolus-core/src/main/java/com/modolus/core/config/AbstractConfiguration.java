@@ -30,7 +30,7 @@ public abstract class AbstractConfiguration<T extends AbstractConfiguration<T>> 
     private final Class<T> configurationClass;
 
     protected AbstractConfiguration(Class<T> configurationClass) {
-        this(configurationClass, SingletonScope.PLUGIN);
+        this(configurationClass, SingletonScope.PLUGIN, true);
     }
 
     @ApiStatus.Internal
@@ -39,7 +39,14 @@ public abstract class AbstractConfiguration<T extends AbstractConfiguration<T>> 
         this.plugin = scope == SingletonScope.PLUGIN
                 ? ExactScopedLazy.ofPlugin(JavaPlugin.class)
                 : ExactScopedLazy.ofRoot(JavaPlugin.class);
-        Singletons.provideSingleton(this, scope);
+    }
+
+    @ApiStatus.Internal
+    protected AbstractConfiguration(Class<T> configurationClass, SingletonScope scope, boolean initialize) {
+        this(configurationClass, scope);
+        if (initialize) {
+            Singletons.provideSingleton(this, scope);
+        }
     }
 
     protected abstract void onConfigurationLoaded();

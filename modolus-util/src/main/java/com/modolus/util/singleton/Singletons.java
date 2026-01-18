@@ -12,27 +12,27 @@ public class Singletons {
 
     private static final RootSingletonManager ROOT_SINGLETON_MANAGER = new RootSingletonManager();
 
-    public static <T extends Singleton> Result<Singleton, SingletonError> provideSingleton(@NotNull T value,
+    public static <T extends Singleton> Result<T, SingletonError> provideSingleton(@NotNull T value,
                                                                                            @NotNull SingletonScope scope) {
         if (scope == SingletonScope.ROOT) return ROOT_SINGLETON_MANAGER.provideSingleton(value);
         return ROOT_SINGLETON_MANAGER.provideSingletonInPluginScope(value);
     }
 
-    public static <T extends Singleton> Result<Singleton, SingletonError> provideSingleton(@NotNull T value,
+    public static <T extends Singleton> Result<T, SingletonError> provideSingleton(@NotNull T value,
                                                                                            @NotNull String singletonIdentifier,
                                                                                            @NotNull SingletonScope scope) {
         if (scope == SingletonScope.ROOT) return ROOT_SINGLETON_MANAGER.provideSingleton(value, singletonIdentifier);
         return ROOT_SINGLETON_MANAGER.provideSingletonInPluginScope(value, singletonIdentifier);
     }
 
-    public static <I, T extends I> Result<Singleton, SingletonError> provideSingleton(@NotNull Class<? extends I> forType,
+    public static <I, T extends I> Result<T, SingletonError> provideSingleton(@NotNull Class<? extends I> forType,
                                                                                       @NotNull T value,
                                                                                       @NotNull SingletonScope scope) {
         if (scope == SingletonScope.ROOT) return ROOT_SINGLETON_MANAGER.provideSingleton(forType, value);
         return ROOT_SINGLETON_MANAGER.provideSingletonInPluginScope(forType, value);
     }
 
-    public static <I, T extends I> Result<Singleton, SingletonError> provideSingleton(@NotNull Class<? extends I> forType,
+    public static <I, T extends I> Result<T, SingletonError> provideSingleton(@NotNull Class<? extends I> forType,
                                                                                       @NotNull T value,
                                                                                       @NotNull String singletonIdentifier,
                                                                                       @NotNull SingletonScope scope) {
@@ -96,8 +96,8 @@ public class Singletons {
         else ROOT_SINGLETON_MANAGER.destructSingletonInPluginScope(singleton).orElseThrow();
     }
 
-    public static void destructSingletons() {
-        ROOT_SINGLETON_MANAGER.destructSingletons();
+    public static @NotNull Result<String, SingletonError> destructSingletons() {
+        return ROOT_SINGLETON_MANAGER.destructSingletons();
     }
 
     public static void debugSingletons(@NotNull Consumer<String> messageSender) {

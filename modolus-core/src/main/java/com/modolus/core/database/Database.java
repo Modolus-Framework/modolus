@@ -2,16 +2,18 @@ package com.modolus.core.database;
 
 import com.modolus.core.logger.Logger;
 import com.modolus.core.logger.LoggerUtils;
+import com.modolus.util.result.ExceptionConsumer;
 import com.modolus.util.result.ExceptionFunction;
 import com.modolus.util.result.Result;
 import com.modolus.util.singleton.Lazy;
 import com.modolus.util.singleton.Singleton;
-import com.modolus.util.singleton.SingletonScope;
-import com.modolus.util.singleton.Singletons;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.configuration.FluentConfiguration;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -20,10 +22,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public class Database implements Singleton {
 
     private final Lazy<Logger> logger = Lazy.ofPlugin(Logger.class);
@@ -59,12 +60,14 @@ public class Database implements Singleton {
         });
     }
 
-    public final <T> @NotNull Result<Stream<T>, DatabaseError> doOnPreparedStatement(
-            @NotNull Function<@NotNull Connection, @NotNull PreparedStatement> preparedStatementBuilder,
-            @NotNull Function<@NotNull ResultSet, @NotNull T> resultSetMapper) {
+    public final <T> @NotNull Result<Stream<T>, DatabaseError> doOnPreparedStatementQuery(
+            @Language("sql") String statementQuery,
+            @NotNull ExceptionConsumer<@NotNull PreparedStatement, SQLException> preparedStatementHandler,
+            @NotNull ExceptionFunction<@NotNull ResultSet, @NotNull T, SQLException> resultSetMapper) {
         return doOnConnection(conn -> {
-            var preparedStatement = preparedStatementBuilder.apply(conn);
-            var resultSet = preparedStatement.getResultSet();
+            var preparedStatement = conn.prepareStatement(statementQuery);
+            preparedStatementHandler.apply(preparedStatement);
+            var resultSet = preparedStatement.executeQuery();
 
             List<T> resultList = new ArrayList<>();
 
@@ -75,6 +78,20 @@ public class Database implements Singleton {
             resultSet.close();
             preparedStatement.close();
             return resultList.stream();
+        });
+    }
+
+    public final @NotNull Result<Integer, DatabaseError> doOnPreparedStatementUpdate(
+            @Language("sql") String statementQuery,
+            @NotNull ExceptionConsumer<@NotNull PreparedStatement, SQLException> preparedStatementHandler) {
+        return doOnConnection(conn -> {
+            var preparedStatement = conn.prepareStatement(statementQuery);
+            preparedStatementHandler.apply(preparedStatement);
+
+            var affected = preparedStatement.executeUpdate();
+
+            preparedStatement.close();
+            return affected;
         });
     }
 
@@ -102,18 +119,15 @@ public class Database implements Singleton {
         config.setMinimumIdle(configuration.getMinimumIdle());
 
         this.dataSource = Result.success(new HikariDataSource(config));
-    }
 
-    public static void provideDatabaseConfiguration() {
-        provideDatabaseConfiguration(SingletonScope.PLUGIN);
-    }
-
-    public static void provideDatabaseConfiguration(SingletonScope scope) {
-        Singletons.provideSingleton(new Database(), scope).onSuccess(Singleton::onInitialization);
-    }
-
-    public static void provideDatabaseConfiguration(String singletonIdentifier, SingletonScope scope) {
-        Singletons.provideSingleton(new Database(), singletonIdentifier, scope).onSuccess(Singleton::onInitialization);
+        if (configuration.getMigrationPath() != null) {
+            dataSource
+                    .map(Flyway.configure()::dataSource)
+                    .map(cfg -> cfg.locations("classpath:" + configuration.getMigrationPath()))
+                    .map(FluentConfiguration::load)
+                    .mapVoid(Flyway::migrate)
+                    .onFailure(databaseError -> LoggerUtils.printError(Logger.getPluginLogger(), String.format("Failed to migrate database with error: %s", databaseError.getMessage())));
+        }
     }
 
 }
