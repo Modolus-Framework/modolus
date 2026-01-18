@@ -5,10 +5,7 @@ import com.modolus.processor.ProcessorUtils;
 import com.modolus.processor.SourceFileWriter;
 import com.modolus.processor.command.args.ProcessorCommandArg;
 import com.modolus.util.singleton.Lazy;
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.CodeBlock;
-import com.palantir.javapoet.MethodSpec;
-import com.palantir.javapoet.ParameterSpec;
+import com.palantir.javapoet.*;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -64,8 +61,13 @@ public final class CommandFileWriter {
         var params = Stream.concat(methodParams, argParams)
                 .toList();
 
-        var callAbstractMethod = CodeBlock.builder()
-                .add("return executeCommand(")
+        var callAbstractMethod = CodeBlock.builder();
+
+        if (!returnType.equals(TypeName.VOID))
+            callAbstractMethod.add("return ");
+
+        callAbstractMethod
+                .add("executeCommand(")
                 .add(CodeBlock.join(params, ", "))
                 .add(");");
 
