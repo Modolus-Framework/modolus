@@ -17,13 +17,15 @@ jobs:
           distribution: 'temurin'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        env: {
+        env:
           SKIP_SERVER_TASK: true
-        }
       - name: Build with Gradle Wrapper
         run: ./gradlew build
+        env:
+          SKIP_SERVER_TASK: true
       - name: Publish to GitHub Packages
         run: ./gradlew publish
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_SERVER_TASK: true
