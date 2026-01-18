@@ -2,19 +2,20 @@ package com.modolus.core;
 
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.ShutdownReason;
+import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.modolus.annotations.plugin.HytalePlugin;
 import com.modolus.annotations.plugin.PluginAuthor;
 import com.modolus.core.database.DatabaseConfiguration;
 import com.modolus.core.logger.Logger;
+import com.modolus.core.logger.LoggerUtils;
 import com.modolus.core.runtime.Runtime;
 import com.modolus.core.runtime.RuntimeError;
-import com.modolus.util.singleton.Lazy;
-import com.modolus.util.singleton.Singleton;
-import com.modolus.util.singleton.SingletonScope;
-import com.modolus.util.singleton.Singletons;
+import com.modolus.util.singleton.*;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.CompletableFuture;
 
 @HytalePlugin(
         group = "com.modolus",
@@ -38,12 +39,31 @@ public final class Plugin extends JavaPlugin implements Singleton {
     }
 
     @Override
+    public @NotNull CompletableFuture<Void> preLoad() {
+        var before = super.preLoad();
+
+        var scopeProvider = CompletableFuture.runAsync(() -> {
+            Logger.provideRootLogger(getLogger());
+            Runtime.initializeRuntime().onFailure(this::handleRuntimeInitializationError);
+        });
+
+        return before != null ? CompletableFuture.allOf(before, scopeProvider) : scopeProvider;
+    }
+
+    @Override
     protected void setup() {
-        Logger.provideRootLogger(getLogger());
-        Singletons.provideSingleton(JavaPlugin.class, this, SingletonScope.ROOT);
+        Singletons.provideSingleton(JavaPlugin.class, this, SingletonScope.ROOT).orElseThrow();
         DatabaseConfiguration.provideDatabaseConfiguration(SingletonScope.ROOT);
-        Runtime.initializeRuntime()
-                .onFailure(this::handleRuntimeInitializationError);
+
+        Runtime.requireSuccess(Runtime.initializeCurrentScope());
+
+
+        LazySet.ofRoot(AbstractCommand.class).get()
+                .mapVoid(commands -> commands.forEach(command -> {
+                    getCommandRegistry().registerCommand(command);
+                    LoggerUtils.printInfo(logger, String.format("Registered command %s", command.getClass().getSimpleName()));
+                }))
+                .onFailure(err -> LoggerUtils.printError(logger, String.format("Failed to get commands with error: %s", err.name())));
     }
 
     @Override

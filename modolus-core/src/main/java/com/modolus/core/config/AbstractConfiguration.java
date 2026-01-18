@@ -4,11 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.modolus.annotations.config.Config;
 import com.modolus.core.logger.Logger;
+import com.modolus.core.logger.LoggerUtils;
 import com.modolus.util.result.Result;
-import com.modolus.util.singleton.Lazy;
-import com.modolus.util.singleton.Singleton;
-import com.modolus.util.singleton.SingletonScope;
-import com.modolus.util.singleton.Singletons;
+import com.modolus.util.singleton.*;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import tools.jackson.databind.ObjectMapper;
 
@@ -19,7 +18,7 @@ import java.nio.file.Path;
 public abstract class AbstractConfiguration<T extends AbstractConfiguration<T>> implements Singleton {
 
     @JsonIgnore
-    private final Lazy<JavaPlugin> plugin = Lazy.ofPlugin(JavaPlugin.class);
+    private final ExactScopedLazy<JavaPlugin> plugin;
 
     @JsonIgnore
     private final Lazy<Logger> logger = Logger.getPluginLogger();
@@ -31,12 +30,15 @@ public abstract class AbstractConfiguration<T extends AbstractConfiguration<T>> 
     private final Class<T> configurationClass;
 
     protected AbstractConfiguration(Class<T> configurationClass) {
-        this.configurationClass = configurationClass;
-        Singletons.provideSingleton(this, SingletonScope.PLUGIN);
+        this(configurationClass, SingletonScope.PLUGIN);
     }
 
-    AbstractConfiguration(Class<T> configurationClass, SingletonScope scope) {
+    @ApiStatus.Internal
+    protected AbstractConfiguration(Class<T> configurationClass, SingletonScope scope) {
         this.configurationClass = configurationClass;
+        this.plugin = scope == SingletonScope.PLUGIN
+                ? ExactScopedLazy.ofPlugin(JavaPlugin.class)
+                : ExactScopedLazy.ofRoot(JavaPlugin.class);
         Singletons.provideSingleton(this, scope);
     }
 
@@ -94,9 +96,11 @@ public abstract class AbstractConfiguration<T extends AbstractConfiguration<T>> 
                 .mapVoid(_ -> objectMapper.writerWithDefaultPrettyPrinter().writeValue(path, this));
     }
 
-    private void logError(IOException exception) {
-        logger.get().onSuccess(l -> l.atSevere().log(String.format("An error occured while loading configuration: %s", exception.getMessage())));
-        logger.get().onFailure(_ -> java.util.logging.Logger.getGlobal().severe("An error occured while loading configuration: " + exception.getMessage()));
+    private void logError(@NotNull IOException exception) {
+        LoggerUtils.printError(logger,
+                String.format("An error occured while loading configuration: %s (Configuration: %s)",
+                        exception.getMessage(),
+                        getClass().getCanonicalName()));
     }
 
 }

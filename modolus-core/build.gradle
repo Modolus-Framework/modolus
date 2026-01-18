@@ -1,6 +1,10 @@
+apply plugin: 'java-library'
+
 dependencies {
     implementation project(":modolus-util")
+    api project(":modolus-util")
     implementation project(":modolus-annotations")
+    api project(":modolus-annotations")
     annotationProcessor project(":modolus-processor")
 
     implementation "tools.jackson.core:jackson-core:3.0.3"

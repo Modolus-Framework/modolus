@@ -27,15 +27,24 @@ public final class Logger implements Singleton {
 
     private Logger(HytaleLogger hytaleLogger, String singletonIdentifier, SingletonScope scope) {
         this(hytaleLogger);
-        Singletons.provideSingleton(this, singletonIdentifier, scope);
+        if (singletonIdentifier == null) Singletons.provideSingleton(this, scope);
+        else Singletons.provideSingleton(this, singletonIdentifier, scope);
     }
 
-    public static void provideLogger(@NotNull HytaleLogger logger, String loggerIdentifier) {
+    public static void providePluginLogger(@NotNull HytaleLogger logger) {
+        providePluginLogger(logger, null);
+    }
+
+    public static void providePluginLogger(@NotNull HytaleLogger logger, String loggerIdentifier) {
         new Logger(logger, loggerIdentifier, SingletonScope.PLUGIN);
     }
 
     public static void provideRootLogger(@NotNull HytaleLogger logger) {
-        new Logger(logger, "logger", SingletonScope.ROOT);
+        provideRootLogger(logger, null);
+    }
+
+    public static void provideRootLogger(@NotNull HytaleLogger logger, String loggerIdentifier) {
+        new Logger(logger, loggerIdentifier, SingletonScope.ROOT);
     }
 
     public HytaleLogger.Api at(Level level) {

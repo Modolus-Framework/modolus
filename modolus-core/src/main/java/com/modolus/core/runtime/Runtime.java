@@ -1,9 +1,11 @@
 package com.modolus.core.runtime;
 
+import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.ShutdownReason;
 import com.modolus.core.logger.Logger;
+import com.modolus.core.logger.LoggerUtils;
 import com.modolus.util.result.Result;
-import com.modolus.util.singleton.Lazy;
-import com.modolus.util.singleton.SingletonScope;
+import com.modolus.util.singleton.SingletonError;
 import com.modolus.util.singleton.Singletons;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
@@ -20,13 +22,24 @@ import java.util.Set;
 public class Runtime {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final Lazy<Logger> LOGGER = Logger.getRootLogger();
 
-    public static Result<Void, RuntimeError> initializeRuntime() {
+    public static @NotNull Result<Void, RuntimeError> initializeRuntime() {
         var classLoaderResult = getDefaultClassLoader();
 
         return initializeScopes(classLoaderResult)
                 .flatMap(_ -> initializeClasses(classLoaderResult));
+    }
+
+    public static @NotNull Result<Void, RuntimeError> initializeCurrentScope() {
+        return Singletons.initializeSingletons()
+                .<RuntimeError>switchMapError()
+                .caseError(SingletonError.SCOPE_ALREADY_INITIALIZED, RuntimeError.FAILED_TO_INITIALIZE_CURRENT_SCOPE)
+                .finish()
+                .mapVoid(scope -> LoggerUtils.printInfo(Logger.getPluginLogger(), String.format("Current scope successfully initialized (Scope: %s)", scope)));
+    }
+
+    public static void requireSuccess(@NotNull Result<Void, RuntimeError> result) {
+        result.onFailure(Runtime::handleRuntimeInitializationError);
     }
 
     private static @NotNull Result<Void, RuntimeError> initializeScopes(@NotNull Result<ClassLoader, RuntimeError> classLoader) {
@@ -35,7 +48,10 @@ public class Runtime {
                 .map(Runtime::collectStringSet)
                 .map(result -> result.mapError(_ -> RuntimeError.FAILED_TO_LOAD_SCOPES))
                 .flatMap(r -> r)
-                .mapVoid(scopes -> scopes.forEach(Singletons::registerScope));
+                .mapVoid(scopes -> scopes.forEach(scope -> {
+                    LoggerUtils.printInfo(Logger.getPluginLogger(), "Initializing scope " + scope);
+                    Singletons.registerScope(scope);
+                }));
     }
 
     private static @NotNull Result<Void, RuntimeError> initializeClasses(@NotNull Result<ClassLoader, RuntimeError> classLoader) {
@@ -44,34 +60,30 @@ public class Runtime {
                 .map(Runtime::collectStringSet)
                 .map(result -> result.mapError(_ -> RuntimeError.FAILED_TO_READ_CLASSES))
                 .flatMap(r -> r)
-                .tap(result -> printInfo("Found classes to initialize: " + String.join(",", result)))
+                .tap(result -> LoggerUtils.printInfo(Logger.getPluginLogger(), "Found classes to initialize: " + String.join(",", result)))
                 .mapVoid(classes -> classes.parallelStream()
                         .map(Runtime::getClassByName)
-                        .peek(result -> result.tap(clazz -> printInfo("Found class " + clazz.getName())))
+                        .peek(result -> result.tap(clazz -> LoggerUtils.printInfo(Logger.getPluginLogger(), "Found class " + clazz.getName())))
                         .map(Runtime::constructClass)
                         .forEach(Runtime::logError))
-                .mapVoid(_ -> {
-                    printInfo("Runtime successfully created all classes");
-                    printInfo("Starting singletons initialization");
-                    Singletons.initializeSingletons();
-                });
+                .mapVoid(_ -> LoggerUtils.printInfo(Logger.getPluginLogger(), "Runtime successfully created all classes"));
     }
 
     private void logError(@NotNull Result<Void, RuntimeError> result) {
         result
                 .mapError(RuntimeError::name)
-                .onFailure(Runtime::printWarning);
+                .onFailure(s -> LoggerUtils.printError(Logger.getPluginLogger(), s));
     }
 
     private @NotNull Result<Void, RuntimeError> constructClass(@NotNull Result<Class<?>, RuntimeError> result) {
         return result.mapExceptionVoid(Runtime::constructClass, ex -> {
-            printWarning("Failed to construct class " + ex.getMessage());
+            LoggerUtils.printWarn(Logger.getPluginLogger(), "Failed to construct class " + ex.getMessage());
             return RuntimeError.FAILED_TO_CREATE_CLASS;
         }, ReflectiveOperationException.class);
     }
 
     private void constructClass(@NotNull Class<?> clazz) throws ReflectiveOperationException {
-        printInfo("Constructing class " + clazz.getName());
+        LoggerUtils.printInfo(Logger.getPluginLogger(), "Constructing class " + clazz.getName());
         var constructor = clazz.getConstructor();
         constructor.trySetAccessible();
         constructor.newInstance();
@@ -106,14 +118,10 @@ public class Runtime {
                 .mapError(_ -> RuntimeError.NO_AVAILABLE_CLASS_LOADER);
     }
 
-    private static void printWarning(String message) {
-        LOGGER.get().onSuccess(logger -> logger.atWarning().log(message));
-        LOGGER.get().onFailure(_ -> java.util.logging.Logger.getGlobal().warning(message));
-    }
-
-    private static void printInfo(String message) {
-        LOGGER.get().onSuccess(logger -> logger.atInfo().log(message));
-        LOGGER.get().onFailure(_ -> java.util.logging.Logger.getGlobal().info(message));
+    private void handleRuntimeInitializationError(@NotNull RuntimeError runtimeError) {
+        var message = String.format("An error occured while booting modolus %s", runtimeError.name());
+        LoggerUtils.printError(Logger.getPluginLogger(), message);
+        HytaleServer.get().shutdownServer(new ShutdownReason(1, message));
     }
 
 }

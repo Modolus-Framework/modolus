@@ -1,25 +1,28 @@
 package com.modolus.util.singleton;
 
 import com.modolus.util.result.Result;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public final class RootSingletonManager extends ScopedSingletonManager {
 
-    private static final List<String> ROOT_PACKAGE_NAMES = List.of(
+    static final List<String> ROOT_PACKAGE_NAMES = List.of(
             "com.modolus.util",
             "com.modolus.core",
-            "com.modolus.annotations"
+            "com.modolus.annotations",
+            "java"
     );
 
     private final Map<String, ScopedSingletonManager> scopes = new ConcurrentHashMap<>();
+
+    RootSingletonManager() {
+        super("ROOT");
+    }
 
     public <T extends Singleton> @NotNull Result<Singleton, SingletonError> provideSingletonInPluginScope(@NotNull T value) {
         return getCallersScopeManager()
@@ -56,27 +59,45 @@ public final class RootSingletonManager extends ScopedSingletonManager {
                 .flatMap(manager -> manager.getSingleton(clazz, identifier));
     }
 
+
+    public @NotNull <T> Result<Set<T>, SingletonError> getSingletonsInPluginScope(@NotNull Class<T> clazz) {
+        return getCallersScopeManager()
+                .map(manager -> manager.getSingletons(clazz));
+    }
+
     public @NotNull Result<Void, SingletonError> destructSingletonInPluginScope(@NotNull Singleton singleton) {
         return getCallersScopeManager()
-                .mapVoid((Consumer<ScopedSingletonManager>) manager ->
+                .mapVoid(manager ->
                         manager.destructSingleton(singleton));
     }
 
-    public void registerScope(String scopeBasePackage) {
+    public void registerScope(@NotNull String scopeBasePackage) {
         if (ROOT_PACKAGE_NAMES.stream().anyMatch(scopeBasePackage::startsWith)) return;
-        scopes.put(scopeBasePackage, new ScopedSingletonManager());
+        scopes.put(scopeBasePackage, new ScopedSingletonManager(scopeBasePackage));
     }
 
     @Override
-    public void initializeSingletons() {
-        scopes.forEach((_, manager) -> manager.initializeSingletons());
-        super.initializeSingletons();
+    public @NotNull Result<String, SingletonError> initializeSingletons() {
+        return getCallersScopeManager()
+                .flatMap(ScopedSingletonManager::initializeSingletons)
+                .recoverFlat(_ -> super.initializeSingletons());
     }
 
     @Override
     public void destructSingletons() {
         scopes.forEach((_, manager) -> manager.destructSingletons());
         super.destructSingletons();
+    }
+
+    @Override
+    public void debugSingletons(@NotNull Consumer<String> messageSender) {
+        messageSender.accept("Scope (root):");
+        super.debugSingletons(messageSender);
+
+        this.scopes.forEach((packageName, manager) -> {
+            messageSender.accept("Scope (" + packageName + "):");
+            manager.debugSingletons(messageSender);
+        });
     }
 
     private @NotNull Result<ScopedSingletonManager, SingletonError> getCallersScopeManager() {
@@ -100,5 +121,4 @@ public final class RootSingletonManager extends ScopedSingletonManager {
                         .map(Map.Entry::getValue))
                 .mapError(_ -> SingletonError.FAILED_TO_GET_CALLERS_SCOPE);
     }
-
 }

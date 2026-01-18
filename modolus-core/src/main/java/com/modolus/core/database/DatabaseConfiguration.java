@@ -9,6 +9,7 @@ import com.modolus.util.singleton.Lazy;
 import com.modolus.util.singleton.SingletonScope;
 import com.modolus.util.singleton.Singletons;
 import lombok.Getter;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -47,9 +48,11 @@ public class DatabaseConfiguration extends AbstractConfiguration<DatabaseConfigu
     private int maximumPoolSize = 10;
 
     protected DatabaseConfiguration(SingletonScope scope, @Nullable String databaseSingletonIdentifier) {
-        super(DatabaseConfiguration.class);
+        super(DatabaseConfiguration.class, scope);
         this.scope = scope;
-        this.database = databaseSingletonIdentifier == null ? Lazy.of(Database.class, scope) : Lazy.of(Database.class, scope, databaseSingletonIdentifier);
+        this.database = databaseSingletonIdentifier == null
+                ? Lazy.of(Database.class, scope)
+                : Lazy.of(Database.class, scope, databaseSingletonIdentifier);
     }
 
     @Override
@@ -66,10 +69,12 @@ public class DatabaseConfiguration extends AbstractConfiguration<DatabaseConfigu
         provideDatabaseConfiguration(SingletonScope.PLUGIN, databaseSingletonIdentifier);
     }
 
+    @ApiStatus.Internal
     public static void provideDatabaseConfiguration(SingletonScope scope) {
         provideDatabaseConfiguration(scope, null);
     }
 
+    @ApiStatus.Internal
     public static void provideDatabaseConfiguration(SingletonScope scope, String databaseSingletonIdentifier) {
         Singletons.provideSingleton(new DatabaseConfiguration(scope, databaseSingletonIdentifier), scope);
     }

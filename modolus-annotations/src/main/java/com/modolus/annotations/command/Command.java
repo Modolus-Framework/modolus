@@ -17,6 +17,8 @@ public @interface Command {
 
     CommandTarget target() default CommandTarget.ALL;
 
+    SubCommand[] subCommands() default {};
+
     enum CommandTarget {
         PLAYER,
         WORLD,

@@ -13,7 +13,7 @@ public class ResultErrorSwitch<A, B, Y> {
     private Result<A, Y> result = null;
 
     public ResultErrorSwitch<A, B, Y> caseError(B expected, Y value) {
-        return caseError(expected, unused -> value);
+        return caseError(expected, _ -> value);
     }
 
     public ResultErrorSwitch<A, B, Y> caseError(B expected, Function<B, Y> mapper) {
@@ -24,7 +24,7 @@ public class ResultErrorSwitch<A, B, Y> {
     }
 
     public ResultErrorSwitch<A, B, Y> otherwise(Y value) {
-        return otherwise(unused -> value);
+        return otherwise(_ -> value);
     }
 
     public ResultErrorSwitch<A, B, Y> otherwise(Function<B, Y> mapper) {

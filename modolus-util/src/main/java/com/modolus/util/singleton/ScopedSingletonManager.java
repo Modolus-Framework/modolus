@@ -2,19 +2,27 @@ package com.modolus.util.singleton;
 
 import com.modolus.util.result.Result;
 import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.CaseUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public sealed class ScopedSingletonManager permits RootSingletonManager {
 
     private final Map<Class<?>, Map<String, Singleton>> singletonHolder = new ConcurrentHashMap<>();
+
+    private final String scopeName;
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     public <T extends Singleton> Result<Singleton, SingletonError> provideSingleton(@NotNull T value) {
         return provideSingleton(value, getDefaultSingletonNameFor(value.getClass()));
@@ -48,11 +56,15 @@ public sealed class ScopedSingletonManager permits RootSingletonManager {
         return Result.success(singleton);
     }
 
-    public void initializeSingletons() {
+    public Result<String, SingletonError> initializeSingletons() {
+        if (initialized.get()) return Result.failure(SingletonError.SCOPE_ALREADY_INITIALIZED);
+
         singletonHolder.values().stream()
                 .map(Map::values)
                 .flatMap(Collection::stream)
                 .forEach(Singleton::onInitialization);
+        initialized.set(true);
+        return Result.success(scopeName);
     }
 
     public <T> Result<T, SingletonError> getSingleton(Class<T> clazz) {
@@ -67,6 +79,15 @@ public sealed class ScopedSingletonManager permits RootSingletonManager {
         var value = map.get(identifier);
         if (!clazz.isInstance(value)) return Result.failure(SingletonError.INSTANCE_IS_NOT_THE_REQUESTED_TYPE);
         return Result.success(clazz.cast(value));
+    }
+
+    public <T> Set<T> getSingletons(Class<T> clazz) {
+        if (!singletonHolder.containsKey(clazz)) return Set.of();
+        return singletonHolder.get(clazz).values()
+                .stream()
+                .filter(clazz::isInstance)
+                .map(clazz::cast)
+                .collect(Collectors.toSet());
     }
 
     public void destructSingleton(@NotNull Singleton singleton) {
@@ -86,6 +107,21 @@ public sealed class ScopedSingletonManager permits RootSingletonManager {
                 .flatMap(Collection::stream)
                 .forEach(Singleton::onDestruction);
         singletonHolder.clear();
+    }
+
+    public void debugSingletons(@NotNull Consumer<String> messageSender) {
+        singletonHolder.forEach((clazz, map) -> {
+            messageSender.accept("  Provided for (" + shortClassName(clazz) + "):");
+            map.forEach((identifier, singleton) -> messageSender.accept("    " + identifier + ": " + shortClassName(singleton.getClass())));
+        });
+    }
+
+    private @NotNull String shortClassName(@NotNull Class<?> clazz) {
+        String packageName = Stream.of(clazz.getPackageName().split("\\."))
+                .map(part -> String.valueOf(part.charAt(0)))
+                .collect(Collectors.joining("."));
+
+        return packageName + "." + clazz.getSimpleName();
     }
 
 }

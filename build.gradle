@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'java-library'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.3'
 }
 
@@ -52,10 +53,11 @@ subprojects {
 dependencies {
     implementation files(hytaleServerPath)
     implementation project(":modolus-core")
+    implementation project(":modolus-test-plugin")
 }
 
 def serverRunDir = file("$projectDir/run")
-if (!serverRunDir.exists()) serverRunDir.mkdirs();
+if (!serverRunDir.exists()) serverRunDir.mkdirs()
 
 idea.project.settings.runConfigurations {
     'HytaleServer'(org.jetbrains.gradle.ext.Application) {

@@ -54,10 +54,6 @@ public class ProvideSingletonProcessor extends Processor {
         var type = ProcessorUtils.getTypeMirror(singleton::value);
         assert type != null;
 
-        if (!processingEnv.getTypeUtils().isSubtype(element.asType(), type)) {
-            processingEnv.getMessager().printError("Is not a subtype of " + type, element);
-        }
-
         if (singleton.singletonIdentifier().isBlank())
             return registerSingletonCodeBlockWithoutCustomIdentifier(type, element, singleton.scope());
         return registerSingletonCodeBlockWithCustomIdentifier(type, element, singleton.singletonIdentifier(), singleton.scope());

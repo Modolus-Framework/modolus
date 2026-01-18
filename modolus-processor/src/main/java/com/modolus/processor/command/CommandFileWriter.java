@@ -1,10 +1,13 @@
 package com.modolus.processor.command;
 
 import com.modolus.annotations.command.Command;
+import com.modolus.processor.ProcessorUtils;
 import com.modolus.processor.SourceFileWriter;
 import com.modolus.processor.command.args.ProcessorCommandArg;
+import com.modolus.util.singleton.Lazy;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterSpec;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,6 +19,8 @@ import java.util.stream.Stream;
 import static com.modolus.processor.command.Constants.*;
 
 public final class CommandFileWriter {
+
+    private static final ClassName LAZY_CLASS_NAME = ClassName.get(Lazy.class);
 
     private final SourceFileWriter sourceFileWriter;
     private final List<ProcessorCommandArg> commandArgs;
@@ -35,6 +40,7 @@ public final class CommandFileWriter {
 
     public void apply(@NotNull ProcessingEnvironment processingEnvironment) {
         appendConstructor();
+        appendSubCommands();
         appendFields(processingEnvironment);
         appendMethods(processingEnvironment);
     }
@@ -89,6 +95,23 @@ public final class CommandFileWriter {
         commandArgs.stream()
                 .map(arg -> arg.toFieldSpec(processingEnvironment))
                 .forEach(sourceFileWriter::addField);
+    }
+
+    private void appendSubCommands() {
+        var builder = MethodSpec.methodBuilder("onInitialization")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class);
+
+        for (var subCommand : command.subCommands()) {
+            var typeMirror = ProcessorUtils.getTypeMirror(subCommand::value);
+
+            if (subCommand.singletonIdentifier().isBlank())
+                builder.addStatement("$T.ofPlugin($T.class).get().onSuccess(this::addSubCommand)", LAZY_CLASS_NAME, typeMirror);
+            else
+                builder.addStatement("$T.ofPlugin($T.class, $S).get().onSuccess(this::addSubCommand)", LAZY_CLASS_NAME, typeMirror, subCommand.singletonIdentifier());
+        }
+
+        sourceFileWriter.addMethod(builder.build());
     }
 
     private ClassName getSuperclass(@NotNull Command command) {
