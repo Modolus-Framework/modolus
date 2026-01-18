@@ -6,6 +6,7 @@ import lombok.experimental.UtilityClass;
 final class Annotations {
 
     static final String COMMAND_ANNOTATION = "com.modolus.annotations.command.Command";
+    static final String EVENT_LISTENER_ANNOTATION = "com.modolus.annotations.event.EventListener";
     static final String PROVIDE_SINGLETONS_ANNOTATION = "com.modolus.annotations.singleton.ProvideSingletons";
     static final String PROVIDE_SINGLETON_ANNOTATION = "com.modolus.annotations.singleton.ProvideSingleton";
     static final String INJECT_SINGLETONS_ANNOTATION = "com.modolus.annotations.singleton.InjectSingletons";

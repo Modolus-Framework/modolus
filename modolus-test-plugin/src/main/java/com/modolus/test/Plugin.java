@@ -50,6 +50,7 @@ public class Plugin extends BasePlugin {
     protected void setup() {
         setupPlugin();
         registerCommands();
+        registerEventListeners();
     }
 
     @Override

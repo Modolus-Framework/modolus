@@ -1,6 +1,7 @@
 package com.modolus.processor;
 
 import com.modolus.processor.command.CommandProcessor;
+import com.modolus.processor.event.EventProcessor;
 import com.modolus.processor.manifest.HytalePluginProcessor;
 import com.modolus.processor.manifest.PluginManifest;
 import com.modolus.processor.singleton.*;
@@ -21,6 +22,7 @@ import static com.modolus.processor.Annotations.*;
 
 @SupportedAnnotationTypes({
         COMMAND_ANNOTATION,
+        EVENT_LISTENER_ANNOTATION,
         PROVIDE_SINGLETONS_ANNOTATION,
         INJECT_SINGLETONS_ANNOTATION,
         PROVIDE_SINGLETON_ANNOTATION,
@@ -34,7 +36,8 @@ import static com.modolus.processor.Annotations.*;
 public class InstanceProcessor extends AbstractProcessor {
 
     private static final List<String> CREATION_ANNOTATIONS = List.of(
-            COMMAND_ANNOTATION
+            COMMAND_ANNOTATION,
+            EVENT_LISTENER_ANNOTATION
     );
 
     private static final List<String> MODIFIER_ANNOTATION = List.of(
@@ -58,6 +61,7 @@ public class InstanceProcessor extends AbstractProcessor {
     public boolean process(@NotNull Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         Map<String, Processor> processors = Map.of(
                 COMMAND_ANNOTATION, new CommandProcessor(processingEnv),
+                EVENT_LISTENER_ANNOTATION, new EventProcessor(processingEnv),
                 PROVIDE_SINGLETON_ANNOTATION, new ProvideSingletonProcessor(processingEnv),
                 PROVIDE_SINGLETONS_ANNOTATION, new ProvideSingletonsProcessor(processingEnv),
                 INJECT_SINGLETON_ANNOTATION, new InjectSingletonProcessor(processingEnv),
