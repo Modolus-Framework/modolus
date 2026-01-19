@@ -37,3 +37,6 @@ bin/
 ### Hytale ###
 hytale.properties
 run
+
+### Docs ###
+node_modules
