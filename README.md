@@ -7,8 +7,37 @@ by providing useful tools such as code generation and more.
 
 Add the modolus framework to your project.
 
+Gradle:
+
 ```groovy
-// tbd
+compileOnly 'dev.modolus:modolus-core:0.0.1'
+annotationProcessor 'dev.modolus:modolus-processor:0.0.1'
+```
+
+Or maven:
+```xml
+<dependencies>
+    <dependency>
+        <groupId>dev.modolus</groupId>
+        <artifactId>modolus-core</artifactId>
+        <version>0.0.1</version>
+    </dependency> 
+</dependencies>
+
+<plugins>
+    <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+            <annotationProcessorPaths>
+                <path>
+                    <groupId>dev.modolus</groupId>
+                    <artifactId>modolus-processor</artifactId>
+                    <version>0.0.1</version>
+                </path>
+            </annotationProcessorPaths>
+        </configuration>
+    </plugin>
+</plugins>
 ```
 
 Create your plugin class like the following.
@@ -67,7 +96,8 @@ Add a command like this:
 public class TestCommand extends AbstractTestCommand {
 
     @Override
-    protected @Nullable CompletableFuture<Void> executeCommand(@NotNull CommandContext commandContext) {
+    protected @Nullable CompletableFuture<Void> executeCommand(
+            @NotNull CommandContext commandContext) {
         commandContext.sendMessage(Message.raw("Test"));
         return null;
     }
