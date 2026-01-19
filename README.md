@@ -28,7 +28,7 @@ Create your plugin class like the following.
         website = "https://example.org",
         dependencies = {
                 @PluginDependency(
-                        name = "com.modolus:modolus-core",
+                        name = "dev.modolus:modolus-core",
                         version = "*"
                 )
         }
