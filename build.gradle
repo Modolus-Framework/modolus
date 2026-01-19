@@ -13,16 +13,16 @@ allprojects {
     }
 }
 
+def projectVersion = '0.0.1-SNAPSHOT'
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'com.diffplug.spotless'
 
     group = 'dev.modolus'
-    version = '0.0.1'
+    version = projectVersion
 
     java {
-        withSourcesJar()
-        withJavadocJar()
         toolchain {
             languageVersion = JavaLanguageVersion.of(25)
         }
@@ -79,7 +79,7 @@ subprojects { sub ->
             apply plugin: 'com.vanniktech.maven.publish'
 
             mavenPublishing {
-                coordinates(sub.group, sub.name, sub.version)
+                coordinates(sub.group.toString(), sub.name, sub.version.toString())
 
                 publishToMavenCentral()
                 signAllPublications()
