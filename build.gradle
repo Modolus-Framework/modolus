@@ -37,7 +37,7 @@ subprojects {
             googleJavaFormat()
             formatAnnotations()
 
-            licenseHeaderFile(rootProject.file('licence-header.txt'))
+            licenseHeaderFile(rootProject.file('required-file-header.txt'))
         }
     }
 
