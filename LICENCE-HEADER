@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Modolus-Framework
+ * Copyright (C) $YEAR Modolus-Framework
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,3 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dev.modolus.annotations.singleton;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Retention(RetentionPolicy.SOURCE)
-@Target(ElementType.TYPE)
-public @interface ProvideSingletons {
-
-  ProvideSingleton[] value();
-}

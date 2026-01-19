@@ -37,7 +37,7 @@ subprojects {
             googleJavaFormat()
             formatAnnotations()
 
-//            licenseHeaderFile(rootProject.file('LICENSE-HEADER'))
+            licenseHeaderFile(rootProject.file('LICENCE-HEADER'))
         }
     }
 
@@ -79,6 +79,8 @@ subprojects { sub ->
             apply plugin: 'com.vanniktech.maven.publish'
 
             mavenPublishing {
+                coordinates(sub.group, sub.name, sub.version)
+
                 publishToMavenCentral()
                 signAllPublications()
 
@@ -89,7 +91,26 @@ subprojects { sub ->
                     licenses {
                         license {
                             name = "GNU General Public License v3.0"
+                            url = "https://www.gnu.org/licenses/gpl-3.0.txt"
+                            distribution = ""
                         }
+                    }
+
+                    developers {
+                        developer {
+                            name = "Louis Schmieder"
+                            email = "dev@louis-schmieder.de"
+                            organization {
+                                name = "Modolus-Framework"
+                                url = "https://github.com/Modolus-Framework"
+                            }
+                        }
+                    }
+
+                    scm {
+                        url = "https://github.com/Modolus-Framework/modolus"
+                        connection = "scm:git:git://github.com/Modolus-Framework/modolus.git"
+                        developerConnection = "scm:git:ssh://git@github.com/Modolus-Framework/modolus.git"
                     }
                 }
             }

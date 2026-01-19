@@ -1,21 +1,41 @@
+/*
+ * Copyright (C) 2026 Modolus-Framework
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package dev.modolus.processor.singleton;
 
 import dev.modolus.processor.Processor;
 import dev.modolus.processor.SharedContext;
 import dev.modolus.processor.SourceFileWriter;
-
+import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
-import java.util.Map;
 
 public class CreateOnRuntimeProcessor extends Processor {
 
-    public CreateOnRuntimeProcessor(ProcessingEnvironment processingEnv) {
-        super(processingEnv);
-    }
+  public CreateOnRuntimeProcessor(ProcessingEnvironment processingEnv) {
+    super(processingEnv);
+  }
 
-    @Override
-    public void processSingle(Element annotated, String className, Map<String, SourceFileWriter> writers, SharedContext sharedContext) {
-        sharedContext.createOnRuntimeClasses().add(className);
-    }
+  @Override
+  public void processSingle(
+      Element annotated,
+      String className,
+      Map<String, SourceFileWriter> writers,
+      SharedContext sharedContext) {
+    sharedContext.createOnRuntimeClasses().add(className);
+  }
 }

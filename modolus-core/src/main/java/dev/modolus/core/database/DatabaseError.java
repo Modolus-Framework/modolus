@@ -1,15 +1,30 @@
+/*
+ * Copyright (C) 2026 Modolus-Framework
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package dev.modolus.core.database;
 
+import java.util.List;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public record DatabaseError(DatabaseErrorType type, List<Object> args) {
 
-    @Contract(pure = true)
-    public @NotNull String getMessage() {
-        return String.format(type.getMessage(), args.toArray(Object[]::new));
-    }
-
+  @Contract(pure = true)
+  public @NotNull String getMessage() {
+    return String.format(type.getMessage(), args.toArray(Object[]::new));
+  }
 }
