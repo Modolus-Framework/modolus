@@ -46,7 +46,7 @@ subprojects {
     }
 
     dependencies {
-        compileOnly 'com.hypixel.hytale:HytaleServer:2026.01.13-dcad8778f-SNAPSHOT'
+        compileOnly 'com.hypixel.hytale:HytaleServer:2026.01.17-4b0f30090-SNAPSHOT'
 
         implementation "org.jetbrains:annotations:26.0.2"
         compileOnly "org.projectlombok:lombok:1.18.42"
@@ -56,7 +56,7 @@ subprojects {
         testImplementation 'org.junit.jupiter:junit-jupiter'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-        testImplementation 'com.hypixel.hytale:HytaleServer:2026.01.13-dcad8778f-SNAPSHOT'
+        testImplementation 'com.hypixel.hytale:HytaleServer:2026.01.17-4b0f30090-SNAPSHOT'
         testCompileOnly "org.projectlombok:lombok:1.18.42"
         testAnnotationProcessor "org.projectlombok:lombok:1.18.42"
     }
