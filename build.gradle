@@ -13,7 +13,7 @@ allprojects {
     }
 }
 
-def projectVersion = '0.0.1-SNAPSHOT'
+def projectVersion = '0.0.1'
 
 subprojects {
     apply plugin: 'java'
@@ -81,7 +81,7 @@ subprojects { sub ->
             mavenPublishing {
                 coordinates(sub.group.toString(), sub.name, sub.version.toString())
 
-                publishToMavenCentral()
+                publishToMavenCentral(true)
                 signAllPublications()
 
                 pom {
