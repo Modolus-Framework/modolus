@@ -1,5 +1,7 @@
 apply plugin: 'java-library'
 
+description = 'The modolus framework core plugin, which provided the base runtime and combines the utilities'
+
 dependencies {
     implementation project(":modolus-util")
     api project(":modolus-util")

@@ -85,8 +85,8 @@ subprojects { sub ->
                 signAllPublications()
 
                 pom {
-                    name = sub.getProperties().get("library-name")
-                    description = sub.getProperties().get("library-description")
+                    name = sub.name
+                    description = sub.description
                     url = "https://github.com/Modolus-Framework/modolus"
                     licenses {
                         license {

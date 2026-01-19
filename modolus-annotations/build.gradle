@@ -1,3 +1,5 @@
+description = 'A modolus module, which contains annotations which are used for code generation'
+
 dependencies {
     implementation project(":modolus-util")
 }

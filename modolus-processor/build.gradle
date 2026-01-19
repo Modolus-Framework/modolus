@@ -1,3 +1,5 @@
+description = 'The modolus framework code generation annotation processor'
+
 dependencies {
     implementation project(":modolus-annotations")
     implementation project(":modolus-util")
