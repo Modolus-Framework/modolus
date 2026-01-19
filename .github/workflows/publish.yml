@@ -29,7 +29,7 @@ jobs:
           ./gradlew modolus-util:publishToMavenCentral
           ./gradlew modolus-annotations:publishToMavenCentral
           ./gradlew modolus-processor:publishToMavenCentral
-          ./gradlew modolus-processor:publishToMavenCentral
+          ./gradlew modolus-core:publishToMavenCentral
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
