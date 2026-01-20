@@ -9,6 +9,9 @@ hero:
       text: Markdown Examples
       link: /markdown-examples
     - theme: alt
+      text: Quick start
+      link: /guide/getting-started
+    - theme: alt
       text: API Examples
       link: /api-examples
 

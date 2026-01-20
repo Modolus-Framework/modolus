@@ -21,6 +21,6 @@ dependencies {
 
 tasks.compileJava {
     options.compilerArgs += [
-            "-AprojectVersion=1.0.0"
+            "-AprojectVersion=${version}"
     ]
 }
