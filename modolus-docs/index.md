@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: "Modolus framework"
-  tagline: My great project tagline
+  tagline: A Modular Framework for Hytale
   actions:
     - theme: brand
       text: Markdown Examples
