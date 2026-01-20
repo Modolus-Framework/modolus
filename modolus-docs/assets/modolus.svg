@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="16"
+   height="16"
+   viewBox="0 0 16 16"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="modolus.svg"
+   inkscape:version="1.4.2 (ebf0e940, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="32"
+     inkscape:cx="11.984375"
+     inkscape:cy="8.359375"
+     inkscape:window-width="1920"
+     inkscape:window-height="940"
+     inkscape:window-x="2560"
+     inkscape:window-y="30"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 8 : 1"
+       inkscape:vp_y="-469.47158 : 882.94763 : 0"
+       inkscape:vp_z="8.4327401 : 2.0654256e-15 : 0"
+       inkscape:persp3d-origin="8 : 5.3333333 : 1"
+       id="perspective1" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="matrix(1,0,0,0.78,0,2)">
+    <g
+       id="g20"
+       inkscape:label="icon"
+       transform="scale(1,0.82051282)">
+      <g
+         id="g19"
+         inkscape:label="lower">
+        <path
+           style="fill:#29303b;fill-opacity:1"
+           d="m 4,7.5 4,4 v 1 l -4,-4 v -1"
+           id="path6-02"
+           inkscape:label="lower_left" />
+        <path
+           style="fill:#383f49;fill-opacity:1"
+           d="m 12,7.5 -4,4 v 1 l 4,-4 v -1"
+           id="path6-3-1"
+           inkscape:label="lower_right" />
+      </g>
+      <g
+         id="g18"
+         inkscape:label="middle">
+        <path
+           style="fill:#408db4;fill-opacity:1"
+           d="m 12,5.5 -4,4 V 10 l 4,-4 0.25,-0.25"
+           id="path7-56"
+           inkscape:label="middle_right_upper" />
+        <path
+           style="fill:#32718f;fill-opacity:1"
+           d="m 12.25,5.75 v 1 L 8,11 v -1"
+           id="path7-5-2"
+           inkscape:label="middle_right_lower" />
+        <path
+           style="fill:#26679f;fill-opacity:1"
+           d="m 4,5.5 4,4 V 10 L 4,6 3.75,5.75"
+           id="path7"
+           inkscape:label="middle_left_upper" />
+        <path
+           style="fill:#1a4870;fill-opacity:1"
+           d="m 3.75,5.75 v 1 L 8,11 v -1"
+           id="path7-5"
+           inkscape:label="middle_left_lower" />
+      </g>
+      <g
+         id="g6"
+         inkscape:label="upper"
+         transform="translate(4)">
+        <path
+           style="fill:#278d89;fill-opacity:1"
+           d="M 0,4 2.0000001,6 V 7 L 0,5 V 4"
+           id="path6"
+           inkscape:label="upper_shadow_left" />
+        <path
+           style="fill:#2a9c98;fill-opacity:1"
+           d="M 2,6 4,4 6,6 V 7 L 4,9 2,7"
+           id="path6-0"
+           inkscape:label="upper_shadow_middle" />
+        <path
+           style="fill:#33b7b4;fill-opacity:1"
+           d="M 8,4 6,6 V 7 L 8,5 V 4"
+           id="path6-3"
+           inkscape:label="upper_shadow_right" />
+        <path
+           style="fill:#4bcdc9;fill-opacity:1;opacity:1"
+           d="M 4,0 0,4 2,6.0000004 4,4 6,6.0000004 7.9999999,4"
+           id="path6-2"
+           inkscape:label="upper" />
+      </g>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.03881px;font-family:'Noto Sans PhagsPa';-inkscape-font-specification:'Noto Sans PhagsPa';text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;white-space:pre;inline-size:33.7472;display:inline;fill:#0c2a28;fill-opacity:1;stroke-width:1.13228"
+       x="34.817471"
+       y="12.915035"
+       id="text19"
+       transform="matrix(0.48327706,0,0,0.61958596,-8.7765671,6.4559283)"
+       inkscape:label="name"><tspan
+         x="34.817471"
+         y="12.915035"
+         id="tspan2"><tspan
+           style="font-family:Monaco;-inkscape-font-specification:Monaco"
+           id="tspan1">MODOLUS</tspan></tspan></text>
+  </g>
+</svg>
