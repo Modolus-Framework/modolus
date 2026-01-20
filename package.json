@@ -1,5 +1,7 @@
 {
-  "dependencies": {},
+  "dependencies": {
+    "@viteplus/versions": "^2.0.6"
+  },
   "devDependencies": {
     "vitepress": "^2.0.0-alpha.15"
   },

@@ -3,6 +3,9 @@
   "configVersion": 1,
   "workspaces": {
     "": {
+      "dependencies": {
+        "@viteplus/versions": "^2.0.6",
+      },
       "devDependencies": {
         "vitepress": "^2.0.0-alpha.15",
       },
@@ -127,6 +130,8 @@
 
     "@opentelemetry/api": ["@opentelemetry/api@1.9.0", "", {}, "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="],
 
+    "@remotex-labs/xansi": ["@remotex-labs/xansi@1.3.3", "", {}, "sha512-P5qKSYLA5508Wt/lh4gUsGW7VO30hL6alswS713WnrYzo5xGknG2O5OddD1Ae/dRzP8e0H1rBJuf1v1ztu3IFQ=="],
+
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.0-beta.53", "", {}, "sha512-vENRlFU4YbrwVqNDZ7fLvy+JR1CRkyr01jhSiDpE1u6py3OMzQfztQU2jxykW3ALNxO4kSlqIDeYyD0Y9RcQeQ=="],
 
     "@rollup/rollup-android-arm-eabi": ["@rollup/rollup-android-arm-eabi@4.55.2", "", { "os": "android", "cpu": "arm" }, "sha512-21J6xzayjy3O6NdnlO6aXi/urvSRjm6nCI6+nF6ra2YofKruGixN9kfT+dt55HVNwfDmpDHJcaS3JuP/boNnlA=="],
@@ -218,6 +223,8 @@
     "@vercel/oidc": ["@vercel/oidc@3.1.0", "", {}, "sha512-Fw28YZpRnA3cAHHDlkt7xQHiJ0fcL+NRcIqsocZQUSmbzeIKRpwttJjik5ZGanXP+vlA4SbTg+AbA3bP363l+w=="],
 
     "@vitejs/plugin-vue": ["@vitejs/plugin-vue@6.0.3", "", { "dependencies": { "@rolldown/pluginutils": "1.0.0-beta.53" }, "peerDependencies": { "vite": "^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0", "vue": "^3.2.25" } }, "sha512-TlGPkLFLVOY3T7fZrwdvKpjprR3s4fxRln0ORDo1VQ7HHyxJwTlrjKU3kpVWTlaAjIEuCTokmjkZnr8Tpc925w=="],
+
+    "@viteplus/versions": ["@viteplus/versions@2.0.6", "", { "dependencies": { "@remotex-labs/xansi": "^1.3.3", "vitepress": "^2.0.0-alpha.12" } }, "sha512-13XNud+sCGTOs1L6Z0Ru7TxwkYmTknGSm/KU7/5wXR7vwMPqaPByC/A4H6R2R3aF8uK4Y1Y9bXyBQYJyYc3/Cw=="],
 
     "@vue/compiler-core": ["@vue/compiler-core@3.5.27", "", { "dependencies": { "@babel/parser": "^7.28.5", "@vue/shared": "3.5.27", "entities": "^7.0.0", "estree-walker": "^2.0.2", "source-map-js": "^1.2.1" } }, "sha512-gnSBQjZA+//qDZen+6a2EdHqJ68Z7uybrMf3SPjEGgG4dicklwDVmMC1AeIHxtLVPT7sn6sH1KOO+tS6gwOUeQ=="],
 
