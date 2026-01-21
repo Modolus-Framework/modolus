@@ -25,6 +25,19 @@ jobs:
         run: ./gradlew build
         env:
           SKIP_SERVER_TASK: true
+      - name: Publish to Maven central
+        run: |
+          - ./gradlew modolus-util:publishToMavenCentral
+          - ./gradlew modolus-annotations:publishToMavenCentral
+          - ./gradlew modolus-processor:publishToMavenCentral
+          - ./gradlew modolus-core:publishToMavenCentral
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_CENTRAL_GPG_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_CENTRAL_GPG_PASSPHRASE }}
+          SKIP_SERVER_TASK: true
+          RELEASE_TYPE: SNAPSHOT
 
   dependency-submission:
     runs-on: ubuntu-latest

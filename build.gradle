@@ -13,7 +13,11 @@ allprojects {
     }
 }
 
-def projectVersion = '0.0.1'
+def releaseType = System.getenv("RELEASE_TYPE")
+def isSnapshot = releaseType == null || releaseType != "RELEASE"
+
+def baseVersion = '0.0.2'
+def projectVersion = isSnapshot ? "$baseVersion-SNAPSHOT" : baseVersion
 
 subprojects {
     apply plugin: 'java'
