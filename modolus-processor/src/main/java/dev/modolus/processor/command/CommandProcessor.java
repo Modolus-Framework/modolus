@@ -66,7 +66,13 @@ public final class CommandProcessor extends Processor {
     var args =
         Stream.of(annotatedArgList)
             .map(arg -> ProcessorCommandArgConverter.fromArg(variableCounter, arg))
-            .peek(result -> result.onFailure(processingEnv.getMessager()::printWarning))
+            .peek(
+                result ->
+                    result.onFailure(
+                        error ->
+                            processingEnv
+                                .getMessager()
+                                .printWarning(error.getFullMessage(), annotated)))
             .filter(Result::isSuccess)
             .map(Result::get)
             .toList();

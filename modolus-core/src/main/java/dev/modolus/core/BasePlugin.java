@@ -56,10 +56,10 @@ public abstract class BasePlugin extends JavaPlugin implements Singleton {
         .get()
         .mapVoid(commands -> commands.forEach(this::registerCommand))
         .onFailure(
-            err ->
-                LoggerUtils.printError(
-                    Logger.getPluginLogger(),
-                    String.format("Failed to get commands with error: %s", err.name())));
+            err -> {
+              LoggerUtils.printError(Logger.getPluginLogger(), "Failed to get commands with error");
+              LoggerUtils.printError(Logger.getPluginLogger(), err);
+            });
   }
 
   protected final void registerEventListeners() {

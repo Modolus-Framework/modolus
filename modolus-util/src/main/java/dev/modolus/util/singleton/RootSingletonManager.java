@@ -123,7 +123,7 @@ public final class RootSingletonManager extends ScopedSingletonManager {
                         .map(frame -> frame.getDeclaringClass().getPackageName())
                         .filter(name -> ROOT_PACKAGE_NAMES.stream().noneMatch(name::startsWith))
                         .findFirst()))
-        .mapError(_ -> SingletonError.FAILED_TO_GET_CALLERS_SCOPE);
+        .mapError(_ -> SingletonError.FAILED_TO_GET_CALLERS_PACKAGE.toError());
   }
 
   private @NotNull Result<ScopedSingletonManager, SingletonError> findScopeNameByPackageName(
@@ -133,6 +133,6 @@ public final class RootSingletonManager extends ScopedSingletonManager {
                 .filter(entry -> packageName.startsWith(entry.getKey()))
                 .findFirst()
                 .map(Map.Entry::getValue))
-        .mapError(_ -> SingletonError.FAILED_TO_GET_CALLERS_SCOPE);
+        .mapError(_ -> SingletonError.FAILED_TO_GET_CALLERS_SCOPE.toError(packageName));
   }
 }

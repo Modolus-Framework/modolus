@@ -15,26 +15,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dev.modolus.core.database;
+package dev.modolus.util.result;
 
-import java.util.List;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@Getter
 @RequiredArgsConstructor
-public enum DatabaseErrorType {
-  DATABASE_NOT_INITIALIZED("Database is not initialized"),
-  GENERIC_SQL_EXCEPTION("SQL Exception: %s"),
-  FAILED_TO_CONNECT_TO_DATABASE("Failed to connect to database with error: %s"),
-  FAILED_TO_RECEIVE_CONNECTION("Failed to receive connection with error: %s");
+public final class Error<T extends Enum<T> & ErrorType<T>> {
 
-  private final String message;
+  @Getter private final T errorType;
+  private final Object[] args;
 
-  @Contract("_ -> new")
-  public @NotNull DatabaseError toError(Object... args) {
-    return new DatabaseError(this, List.of(args));
+  @Nullable private final Error<?> cause;
+
+  public @NotNull String getMessage() {
+    return errorType.getErrorMessage().formatted(args);
+  }
+
+  public @NotNull String getFullMessage() {
+    StringBuilder builder = new StringBuilder();
+    builder.append(getMessage());
+    builder.append(System.lineSeparator());
+    if (cause != null) {
+      builder.append("Caused by: ");
+      builder.append(cause.getFullMessage());
+    }
+
+    return builder.toString();
+  }
+
+  public @NotNull Object[] getArgs() {
+    return Objects.requireNonNullElse(args, new Object[0]);
   }
 }

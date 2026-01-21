@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dev.modolus.core.runtime;
+package dev.modolus.processor;
 
 import dev.modolus.util.result.Error;
 import dev.modolus.util.result.ErrorType;
@@ -26,24 +26,20 @@ import org.jetbrains.annotations.Nullable;
 
 @Getter
 @RequiredArgsConstructor
-public enum RuntimeError implements ErrorType<RuntimeError> {
-  NO_AVAILABLE_CLASS_LOADER("No available class loader."),
-  FAILED_TO_LOAD_RESOURCES("Failed to load resources"),
-  FAILED_TO_LOAD_SCOPES("Failed to load scopes"),
-  FAILED_TO_LOAD_CLASS("Failed to load class: %s"),
-  FAILED_TO_READ_CLASSES("Failed to read classes"),
-  FAILED_TO_CREATE_CLASS("Failed to create class"),
-  FAILED_TO_INITIALIZE_CURRENT_SCOPE("Failed to initialize current scope");
+public enum ProcessorError implements ErrorType<ProcessorError> {
+  NO_COMMAND_ARG_TYPE_SET("No command argument type set for command %s"),
+  ELEMENT_ERROR("An error occurred while processing the previous error."),
+  ;
 
   private final String errorMessage;
 
   @Override
-  public @NotNull Error<RuntimeError> toError(Object... args) {
+  public @NotNull Error<ProcessorError> toError(Object... args) {
     return new Error<>(this, args, null);
   }
 
   @Override
-  public @NotNull Error<RuntimeError> toErrorWithCause(@Nullable Error<?> cause, Object... args) {
+  public @NotNull Error<ProcessorError> toErrorWithCause(@Nullable Error<?> cause, Object... args) {
     return new Error<>(this, args, cause);
   }
 }

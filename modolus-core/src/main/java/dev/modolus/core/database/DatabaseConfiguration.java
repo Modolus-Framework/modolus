@@ -76,9 +76,7 @@ public class DatabaseConfiguration extends AbstractConfiguration<DatabaseConfigu
 
   @Override
   protected void onConfigurationLoaded() {
-    database
-        .get()
-        .onFailure(e -> LoggerUtils.printError(logger, "No database provided: " + e.name()));
+    database.get().onFailure(e -> LoggerUtils.printError(logger, e));
     database.get().onSuccess(db -> db.updateConfiguration(this));
   }
 
