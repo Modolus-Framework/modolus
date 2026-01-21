@@ -46,23 +46,21 @@ public class Database implements Singleton {
   private final Lazy<Logger> logger = Lazy.ofPlugin(Logger.class);
 
   private Result<HikariDataSource, DatabaseError> dataSource =
-      Result.failure(DatabaseErrorType.DATABASE_NOT_INITIALIZED.toError());
+      Result.failure(DatabaseError.DATABASE_NOT_INITIALIZED.toError());
 
   public final <T> @NotNull Result<T, DatabaseError> doOnConnection(
       @NotNull ExceptionFunction<@NotNull Connection, @NotNull T, SQLException> function) {
     return dataSource
-        .mapException(
-            HikariDataSource::getConnection,
-            ex -> DatabaseErrorType.FAILED_TO_RECEIVE_CONNECTION.toError(ex.getMessage()),
-            SQLException.class)
+        .mapException(HikariDataSource::getConnection, SQLException.class)
+        .mapError(DatabaseError.FAILED_TO_RECEIVE_CONNECTION::toError)
         .mapException(
             conn -> {
               var result = function.apply(conn);
               conn.close();
               return result;
             },
-            ex -> DatabaseErrorType.GENERIC_SQL_EXCEPTION.toError(ex.getMessage()),
-            SQLException.class);
+            SQLException.class)
+        .mapError(DatabaseError.GENERIC_SQL_EXCEPTION::toError);
   }
 
   public final <T> @NotNull Result<T, DatabaseError> doOnTransaction(

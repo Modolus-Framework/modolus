@@ -17,11 +17,35 @@
 
 package dev.modolus.util.singleton;
 
-public enum SingletonError {
-  NO_INSTANCE_AVAILABLE,
-  SINGLETON_ALREADY_PROVIDED,
-  INSTANCE_IS_NOT_THE_REQUESTED_TYPE,
-  VALUE_DOES_NOT_IMPLEMENT_SINGLETON_INTERFACE,
-  FAILED_TO_GET_CALLERS_SCOPE,
-  SCOPE_ALREADY_INITIALIZED
+import dev.modolus.util.result.Error;
+import dev.modolus.util.result.ErrorType;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+@Getter
+@RequiredArgsConstructor
+public enum SingletonError implements ErrorType<SingletonError> {
+  NO_INSTANCE_AVAILABLE("No instance of %s is available in scope %s."),
+  SINGLETON_ALREADY_PROVIDED(
+      "A singleton of type %s is already provided for the type %s in scope %s."),
+  INSTANCE_IS_NOT_THE_REQUESTED_TYPE("The requested singleton is not of the requested type."),
+  VALUE_DOES_NOT_IMPLEMENT_SINGLETON_INTERFACE(
+      "The provided value of type %s does not implement Singleton."),
+  FAILED_TO_GET_CALLERS_PACKAGE("Failed to get the caller's package."),
+  FAILED_TO_GET_CALLERS_SCOPE("Failed to get the caller's scope from package %s."),
+  SCOPE_ALREADY_INITIALIZED("The scope %s is already initialized.");
+
+  private final String errorMessage;
+
+  @Override
+  public @NotNull Error<SingletonError> toError(Object... args) {
+    return new Error<>(this, args, null);
+  }
+
+  @Override
+  public @NotNull Error<SingletonError> toErrorWithCause(@Nullable Error<?> cause, Object... args) {
+    return new Error<>(this, args, cause);
+  }
 }

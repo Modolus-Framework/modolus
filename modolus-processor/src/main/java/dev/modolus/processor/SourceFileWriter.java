@@ -63,7 +63,7 @@ public final class SourceFileWriter {
     this.methods.add(method);
   }
 
-  public @NotNull Result<Void, ProcessorException> write(
+  public @NotNull Result<Void, ProcessorError> write(
       @NotNull ProcessingEnvironment processingEnvironment) {
     var clazz =
         classBuilder
@@ -79,6 +79,6 @@ public final class SourceFileWriter {
                     .build()
                     .writeTo(processingEnvironment.getFiler()),
             IOException.class)
-        .mapError(exception -> new ProcessorException(this.root, exception));
+        .mapError(error -> ProcessorError.ELEMENT_ERROR.toErrorWithCause(error, this.root));
   }
 }

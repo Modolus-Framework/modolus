@@ -17,31 +17,17 @@
 
 package dev.modolus.util.result;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@Getter
-@RequiredArgsConstructor
-public enum GenericError implements ErrorType<GenericError> {
-  PREVIOUS_ERROR("An error occurred while processing the previous error."),
-  EMPTY_COLLECTION("An empty collection was provided."),
-  NULL_VALUE("A null value was provided."),
-  OPTIONAL_EMPTY("An empty Optional was provided."),
-  EXCEPTION_THROWN("An exception was thrown with the error: %s");
+public interface ErrorType<T extends Enum<T> & ErrorType<T>> {
 
-  private final String errorMessage;
+  @NotNull String getErrorMessage();
 
   @Contract("_ -> new")
-  @Override
-  public @NotNull Error<GenericError> toError(Object... args) {
-    return new Error<>(this, args, null);
-  }
+  @NotNull Error<T> toError(Object... args);
 
-  @Override
-  public @NotNull Error<GenericError> toErrorWithCause(@Nullable Error<?> cause, Object... args) {
-    return new Error<>(this, args, cause);
-  }
+  @Contract("_, _ -> new")
+  @NotNull Error<T> toErrorWithCause(@Nullable Error<?> cause, Object... args);
 }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dev.modolus.core.runtime;
+package dev.modolus.core.config;
 
 import dev.modolus.util.result.Error;
 import dev.modolus.util.result.ErrorType;
@@ -26,24 +26,21 @@ import org.jetbrains.annotations.Nullable;
 
 @Getter
 @RequiredArgsConstructor
-public enum RuntimeError implements ErrorType<RuntimeError> {
-  NO_AVAILABLE_CLASS_LOADER("No available class loader."),
-  FAILED_TO_LOAD_RESOURCES("Failed to load resources"),
-  FAILED_TO_LOAD_SCOPES("Failed to load scopes"),
-  FAILED_TO_LOAD_CLASS("Failed to load class: %s"),
-  FAILED_TO_READ_CLASSES("Failed to read classes"),
-  FAILED_TO_CREATE_CLASS("Failed to create class"),
-  FAILED_TO_INITIALIZE_CURRENT_SCOPE("Failed to initialize current scope");
+public enum ConfigError implements ErrorType<ConfigError> {
+  PREVIOUS_ERROR("An error occurred while processing the previous error."),
+  CONFIG_CLASS_MISSING_CONFIG_ANNOTATION("Configuration class is missing @Config annotation"),
+  FAILED_LOADING_CONFIGURATION("Failed to load configuration for path: %s"),
+  FAILED_SAVING_CONFIGURATION("Failed to save configuration for path: %s");
 
   private final String errorMessage;
 
   @Override
-  public @NotNull Error<RuntimeError> toError(Object... args) {
+  public @NotNull Error<ConfigError> toError(Object... args) {
     return new Error<>(this, args, null);
   }
 
   @Override
-  public @NotNull Error<RuntimeError> toErrorWithCause(@Nullable Error<?> cause, Object... args) {
+  public @NotNull Error<ConfigError> toErrorWithCause(@Nullable Error<?> cause, Object... args) {
     return new Error<>(this, args, cause);
   }
 }

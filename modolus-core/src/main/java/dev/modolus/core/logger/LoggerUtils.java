@@ -17,6 +17,7 @@
 
 package dev.modolus.core.logger;
 
+import dev.modolus.util.result.Error;
 import dev.modolus.util.singleton.Lazy;
 import java.util.logging.Level;
 import lombok.experimental.UtilityClass;
@@ -35,6 +36,10 @@ public class LoggerUtils {
 
   public static void printError(@NotNull Lazy<Logger> logger, @NotNull String message) {
     print(logger, Level.SEVERE, message);
+  }
+
+  public static void printError(@NotNull Lazy<Logger> logger, @NotNull Error<?> error) {
+    printError(logger, error.getFullMessage());
   }
 
   private static void print(

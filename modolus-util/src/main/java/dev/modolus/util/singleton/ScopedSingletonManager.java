@@ -48,7 +48,9 @@ public sealed class ScopedSingletonManager permits RootSingletonManager {
       @NotNull T value, @NotNull String singletonIdentifier) {
     var map = singletonHolder.computeIfAbsent(value.getClass(), _ -> new HashMap<>());
     if (map.containsKey(singletonIdentifier))
-      return Result.failure(SingletonError.SINGLETON_ALREADY_PROVIDED);
+      return Result.failure(
+          SingletonError.SINGLETON_ALREADY_PROVIDED.toError(
+              value.getClass().getSimpleName(), this.scopeName));
     map.put(singletonIdentifier, value);
     return Result.success(value);
   }
@@ -61,18 +63,23 @@ public sealed class ScopedSingletonManager permits RootSingletonManager {
   public <I, T extends I> Result<T, SingletonError> provideSingleton(
       Class<? extends I> forType, T value, String singletonIdentifier) {
     if (!(value instanceof Singleton singleton)) {
-      return Result.failure(SingletonError.VALUE_DOES_NOT_IMPLEMENT_SINGLETON_INTERFACE);
+      return Result.failure(
+          SingletonError.VALUE_DOES_NOT_IMPLEMENT_SINGLETON_INTERFACE.toError(
+              value.getClass().getSimpleName()));
     }
 
     var map = singletonHolder.computeIfAbsent(forType, _ -> new HashMap<>());
     if (map.containsKey(singletonIdentifier))
-      return Result.failure(SingletonError.SINGLETON_ALREADY_PROVIDED);
+      return Result.failure(
+          SingletonError.SINGLETON_ALREADY_PROVIDED.toError(
+              value.getClass().getSimpleName(), forType.getSimpleName(), this.scopeName));
     map.put(singletonIdentifier, singleton);
     return Result.success(value);
   }
 
   public Result<String, SingletonError> initializeSingletons() {
-    if (initialized.get()) return Result.failure(SingletonError.SCOPE_ALREADY_INITIALIZED);
+    if (initialized.get())
+      return Result.failure(SingletonError.SCOPE_ALREADY_INITIALIZED.toError(scopeName));
 
     singletonHolder.values().stream()
         .map(Map::values)
@@ -88,12 +95,15 @@ public sealed class ScopedSingletonManager permits RootSingletonManager {
 
   public <T> Result<T, SingletonError> getSingleton(Class<T> clazz, String identifier) {
     if (!singletonHolder.containsKey(clazz))
-      return Result.failure(SingletonError.NO_INSTANCE_AVAILABLE);
+      return Result.failure(
+          SingletonError.NO_INSTANCE_AVAILABLE.toError(clazz.getSimpleName(), scopeName));
     var map = singletonHolder.get(clazz);
-    if (!map.containsKey(identifier)) return Result.failure(SingletonError.NO_INSTANCE_AVAILABLE);
+    if (!map.containsKey(identifier))
+      return Result.failure(
+          SingletonError.NO_INSTANCE_AVAILABLE.toError(clazz.getSimpleName(), scopeName));
     var value = map.get(identifier);
     if (!clazz.isInstance(value))
-      return Result.failure(SingletonError.INSTANCE_IS_NOT_THE_REQUESTED_TYPE);
+      return Result.failure(SingletonError.INSTANCE_IS_NOT_THE_REQUESTED_TYPE.toError());
     return Result.success(clazz.cast(value));
   }
 

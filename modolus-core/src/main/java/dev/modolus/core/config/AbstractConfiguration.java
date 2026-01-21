@@ -22,6 +22,8 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import dev.modolus.annotations.config.Config;
 import dev.modolus.core.logger.Logger;
 import dev.modolus.core.logger.LoggerUtils;
+import dev.modolus.util.result.Error;
+import dev.modolus.util.result.GenericError;
 import dev.modolus.util.result.Result;
 import dev.modolus.util.singleton.*;
 import java.io.IOException;
@@ -83,45 +85,49 @@ public abstract class AbstractConfiguration<T extends AbstractConfiguration<T>>
     getConfigPath().flatMap(this::saveConfiguration).onFailure(this::logError);
   }
 
-  private Result<Path, IOException> getConfigPath() {
+  private Result<Path, ConfigError> getConfigPath() {
     var config = configurationClass.getAnnotation(Config.class);
     if (config == null) {
-      return Result.failure(new IOException("Configuration class is missing @Config annotation"));
+      return Result.failure(ConfigError.CONFIG_CLASS_MISSING_CONFIG_ANNOTATION.toError());
     }
 
     return plugin
         .get()
         .map(p -> p.getDataDirectory().resolve(String.format("%s.json", config.name())))
-        .mapError(err -> new IOException(err.name()));
+        .mapError(ConfigError.PREVIOUS_ERROR::toErrorWithCause);
   }
 
-  private Result<Void, IOException> ensureFileExists(Path path) {
+  private Result<Void, GenericError> ensureFileExists(Path path) {
     return Result.ofExceptionVoid(
         () -> Files.createDirectories(path.getParent()), IOException.class);
   }
 
-  private Result<Void, IOException> initialLoadConfiguration(Path path) {
+  private Result<Void, ConfigError> initialLoadConfiguration(Path path) {
     if (Files.notExists(path)) {
       return saveConfiguration(path);
     }
     return loadConfiguration(path);
   }
 
-  private @NotNull Result<Void, IOException> loadConfiguration(Path path) {
+  private @NotNull Result<Void, ConfigError> loadConfiguration(Path path) {
     return Result.ofExceptionVoid(
-        () -> objectMapper.readerForUpdating(this).readValue(path.toFile()), IOException.class);
+            () -> objectMapper.readerForUpdating(this).readValue(path.toFile()), IOException.class)
+        .mapError(
+            baseError ->
+                ConfigError.FAILED_LOADING_CONFIGURATION.toErrorWithCause(
+                    baseError, path.toString()));
   }
 
-  private @NotNull Result<Void, IOException> saveConfiguration(Path path) {
+  private @NotNull Result<Void, ConfigError> saveConfiguration(Path path) {
     return ensureFileExists(path)
-        .mapVoid(_ -> objectMapper.writerWithDefaultPrettyPrinter().writeValue(path, this));
+        .mapVoid(_ -> objectMapper.writerWithDefaultPrettyPrinter().writeValue(path, this))
+        .mapError(
+            baseError ->
+                ConfigError.FAILED_SAVING_CONFIGURATION.toErrorWithCause(
+                    baseError, path.toString()));
   }
 
-  private void logError(@NotNull IOException exception) {
-    LoggerUtils.printError(
-        logger,
-        String.format(
-            "An error occured while loading configuration: %s (Configuration: %s)",
-            exception.getMessage(), getClass().getCanonicalName()));
+  private void logError(@NotNull Error<ConfigError> error) {
+    LoggerUtils.printError(logger, error.getFullMessage());
   }
 }

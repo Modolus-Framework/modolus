@@ -21,6 +21,8 @@ import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.ShutdownReason;
 import dev.modolus.core.logger.Logger;
 import dev.modolus.core.logger.LoggerUtils;
+import dev.modolus.util.result.Error;
+import dev.modolus.util.result.GenericError;
 import dev.modolus.util.result.Result;
 import dev.modolus.util.singleton.SingletonError;
 import dev.modolus.util.singleton.Singletons;
@@ -50,7 +52,7 @@ public class Runtime {
         .<RuntimeError>switchMapError()
         .caseError(
             SingletonError.SCOPE_ALREADY_INITIALIZED,
-            RuntimeError.FAILED_TO_INITIALIZE_CURRENT_SCOPE)
+            RuntimeError.FAILED_TO_INITIALIZE_CURRENT_SCOPE::toErrorWithCause)
         .finish()
         .mapVoid(
             scope ->
@@ -66,12 +68,10 @@ public class Runtime {
   private static @NotNull Result<Void, RuntimeError> initializeScopes(
       @NotNull Result<ClassLoader, RuntimeError> classLoader) {
     return classLoader
-        .mapException(
-            loader -> loader.getResources("runtime-scopes.json"),
-            _ -> RuntimeError.FAILED_TO_LOAD_SCOPES,
-            IOException.class)
+        .mapException(loader -> loader.getResources("runtime-scopes.json"), IOException.class)
+        .mapError(RuntimeError.FAILED_TO_LOAD_SCOPES::toErrorWithCause)
         .map(Runtime::collectStringSet)
-        .map(result -> result.mapError(_ -> RuntimeError.FAILED_TO_LOAD_SCOPES))
+        .map(result -> result.mapError(RuntimeError.FAILED_TO_LOAD_SCOPES::toErrorWithCause))
         .flatMap(r -> r)
         .mapVoid(
             scopes ->
@@ -86,12 +86,10 @@ public class Runtime {
   private static @NotNull Result<Void, RuntimeError> initializeClasses(
       @NotNull Result<ClassLoader, RuntimeError> classLoader) {
     return classLoader
-        .mapException(
-            loader -> loader.getResources("runtime-classes.json"),
-            _ -> RuntimeError.FAILED_TO_LOAD_RESOURCES,
-            IOException.class)
+        .mapException(loader -> loader.getResources("runtime-classes.json"), IOException.class)
+        .mapError(RuntimeError.FAILED_TO_LOAD_RESOURCES::toErrorWithCause)
         .map(Runtime::collectStringSet)
-        .map(result -> result.mapError(_ -> RuntimeError.FAILED_TO_READ_CLASSES))
+        .map(result -> result.mapError(RuntimeError.FAILED_TO_READ_CLASSES::toErrorWithCause))
         .flatMap(r -> r)
         .tap(
             result ->
@@ -118,21 +116,14 @@ public class Runtime {
   }
 
   private void logError(@NotNull Result<Void, RuntimeError> result) {
-    result
-        .mapError(RuntimeError::name)
-        .onFailure(s -> LoggerUtils.printError(Logger.getPluginLogger(), s));
+    result.onFailure(s -> LoggerUtils.printError(Logger.getPluginLogger(), s));
   }
 
   private @NotNull Result<Void, RuntimeError> constructClass(
       @NotNull Result<Class<?>, RuntimeError> result) {
-    return result.mapExceptionVoid(
-        Runtime::constructClass,
-        ex -> {
-          LoggerUtils.printWarn(
-              Logger.getPluginLogger(), "Failed to construct class " + ex.getMessage());
-          return RuntimeError.FAILED_TO_CREATE_CLASS;
-        },
-        ReflectiveOperationException.class);
+    return result
+        .mapExceptionVoid(Runtime::constructClass, ReflectiveOperationException.class)
+        .mapError(RuntimeError.FAILED_TO_CREATE_CLASS::toErrorWithCause);
   }
 
   private void constructClass(@NotNull Class<?> clazz) throws ReflectiveOperationException {
@@ -145,10 +136,10 @@ public class Runtime {
   private @NotNull Result<Class<?>, RuntimeError> getClassByName(String file) {
     return Result.<Class<?>, ClassNotFoundException>ofException(
             () -> Class.forName(file), ClassNotFoundException.class)
-        .mapError(_ -> RuntimeError.FAILED_TO_LOAD_SCOPES);
+        .mapError(err -> RuntimeError.FAILED_TO_LOAD_CLASS.toErrorWithCause(err, file));
   }
 
-  private Result<Set<String>, IOException> collectStringSet(Enumeration<URL> files) {
+  private Result<Set<String>, GenericError> collectStringSet(Enumeration<URL> files) {
     return Result.ofException(
         () -> {
           Set<String> classesToInitialize = new HashSet<>();
@@ -172,12 +163,12 @@ public class Runtime {
         .tryRecoverNullable(_ -> Runtime.class.getClassLoader(), Exception.class)
         .recoverNullable(_ -> ClassLoader.getSystemClassLoader())
         .tryRecoverNullable(_ -> ClassLoader.getSystemClassLoader(), Exception.class)
-        .mapError(_ -> RuntimeError.NO_AVAILABLE_CLASS_LOADER);
+        .mapError(_ -> RuntimeError.NO_AVAILABLE_CLASS_LOADER.toError());
   }
 
-  private void handleRuntimeInitializationError(@NotNull RuntimeError runtimeError) {
-    var message = String.format("An error occured while booting modolus %s", runtimeError.name());
-    LoggerUtils.printError(Logger.getPluginLogger(), message);
-    HytaleServer.get().shutdownServer(new ShutdownReason(1, message));
+  private void handleRuntimeInitializationError(@NotNull Error<RuntimeError> runtimeError) {
+    LoggerUtils.printError(Logger.getPluginLogger(), "An error occured while booting modolus");
+    LoggerUtils.printError(Logger.getPluginLogger(), runtimeError);
+    HytaleServer.get().shutdownServer(new ShutdownReason(1, runtimeError.getMessage()));
   }
 }

@@ -51,10 +51,7 @@ public class Plugin extends BasePlugin {
   @Override
   protected void initializeManualDependencies() {
     var data = DatabaseConfiguration.provideDatabaseConfiguration();
-    data.onFailure(
-        e ->
-            LoggerUtils.printError(
-                Logger.getPluginLogger(), "Failed to initialize database: " + e.name()));
+    data.onFailure(e -> LoggerUtils.printError(Logger.getPluginLogger(), e));
     data.onSuccess(config -> config.withMigrations("test/migrations"));
   }
 

@@ -24,11 +24,13 @@ import dev.modolus.processor.event.EventProcessor;
 import dev.modolus.processor.manifest.HytalePluginProcessor;
 import dev.modolus.processor.manifest.PluginManifest;
 import dev.modolus.processor.singleton.*;
+import dev.modolus.util.result.Error;
 import java.io.OutputStream;
 import java.util.*;
 import javax.annotation.Nullable;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.StandardLocation;
 import lombok.SneakyThrows;
@@ -104,7 +106,7 @@ public class InstanceProcessor extends AbstractProcessor {
         .map(Map::values)
         .flatMap(Collection::stream)
         .map(file -> file.write(processingEnv))
-        .forEach(error -> error.onFailure(e -> e.print(processingEnv)));
+        .forEach(error -> error.onFailure(this::logError));
 
     collectedClassesForRuntimeCreation.addAll(sharedContext.createOnRuntimeClasses());
     collectedScopes.addAll(sharedContext.scopePackages());
@@ -163,5 +165,17 @@ public class InstanceProcessor extends AbstractProcessor {
     if (CREATION_ANNOTATIONS.contains(element.getQualifiedName().toString())) return 2;
     if (MODIFIER_ANNOTATION.contains(element.getQualifiedName().toString())) return 1;
     return 0;
+  }
+
+  private void logError(@NotNull Error<ProcessorError> error) {
+    var logger = processingEnv.getMessager();
+    if (error.getErrorType() == ProcessorError.ELEMENT_ERROR
+        && error.getArgs().length == 1
+        && error.getArgs()[0] instanceof Element elem) {
+      logger.printError(error.getFullMessage(), elem);
+      return;
+    }
+
+    logger.printError(error.getFullMessage());
   }
 }

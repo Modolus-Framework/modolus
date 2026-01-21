@@ -23,6 +23,7 @@ import dev.modolus.annotations.command.Arg;
 import dev.modolus.annotations.command.DefaultArg;
 import dev.modolus.annotations.command.OptionalArg;
 import dev.modolus.annotations.command.RequiredArg;
+import dev.modolus.processor.ProcessorError;
 import dev.modolus.util.result.Result;
 import java.util.Map;
 import lombok.experimental.UtilityClass;
@@ -32,7 +33,8 @@ import org.jetbrains.annotations.Unmodifiable;
 @UtilityClass
 public class ProcessorCommandArgConverter {
 
-  public static @NotNull @Unmodifiable Result<@Unmodifiable @NotNull ProcessorCommandArg, String>
+  public static @NotNull @Unmodifiable Result<
+          @Unmodifiable @NotNull ProcessorCommandArg, ProcessorError>
       fromArg(@NotNull Map<String, Integer> variableCounter, @NotNull Arg arg) {
     var name = getVariableName(variableCounter, arg);
 
@@ -44,7 +46,7 @@ public class ProcessorCommandArgConverter {
       case Arg a when !a.requiredArg().ignore() ->
           Result.success(createRequiredArg(name, a.description(), a.requiredArg()));
       case Arg a when !a.flagArg().ignore() -> Result.success(createFlagArg(name, a.description()));
-      default -> Result.failure("No arg type set for " + arg.name());
+      default -> Result.failure(ProcessorError.NO_COMMAND_ARG_TYPE_SET.toError(arg.name()));
     };
   }
 

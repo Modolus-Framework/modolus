@@ -17,14 +17,30 @@
 
 package dev.modolus.core.database;
 
-import java.util.List;
-import org.jetbrains.annotations.Contract;
+import dev.modolus.util.result.Error;
+import dev.modolus.util.result.ErrorType;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public record DatabaseError(DatabaseErrorType type, List<Object> args) {
+@Getter
+@RequiredArgsConstructor
+public enum DatabaseError implements ErrorType<DatabaseError> {
+  DATABASE_NOT_INITIALIZED("Database is not initialized"),
+  GENERIC_SQL_EXCEPTION("SQL Exception: %s"),
+  FAILED_TO_CONNECT_TO_DATABASE("Failed to connect to database"),
+  FAILED_TO_RECEIVE_CONNECTION("Failed to receive connection");
 
-  @Contract(pure = true)
-  public @NotNull String getMessage() {
-    return String.format(type.getMessage(), args.toArray(Object[]::new));
+  private final String errorMessage;
+
+  @Override
+  public @NotNull Error<DatabaseError> toError(Object... args) {
+    return new Error<>(this, args, null);
+  }
+
+  @Override
+  public @NotNull Error<DatabaseError> toErrorWithCause(@Nullable Error<?> cause, Object... args) {
+    return new Error<>(this, args, cause);
   }
 }

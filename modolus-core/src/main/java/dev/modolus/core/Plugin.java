@@ -28,6 +28,7 @@ import dev.modolus.core.logger.Logger;
 import dev.modolus.core.logger.LoggerUtils;
 import dev.modolus.core.runtime.Runtime;
 import dev.modolus.core.runtime.RuntimeError;
+import dev.modolus.util.result.Error;
 import dev.modolus.util.singleton.*;
 import java.util.concurrent.CompletableFuture;
 import org.jetbrains.annotations.NotNull;
@@ -85,9 +86,10 @@ public final class Plugin extends JavaPlugin implements Singleton {
                               "Registered command %s", command.getClass().getSimpleName()));
                     }))
         .onFailure(
-            err ->
-                LoggerUtils.printError(
-                    logger, String.format("Failed to get commands with error: %s", err.name())));
+            err -> {
+              LoggerUtils.printError(Logger.getPluginLogger(), "Failed to get commands with error");
+              LoggerUtils.printError(Logger.getPluginLogger(), err);
+            });
   }
 
   @Override
@@ -95,14 +97,13 @@ public final class Plugin extends JavaPlugin implements Singleton {
     Singletons.destructSingletons();
   }
 
-  private void handleRuntimeInitializationError(@NotNull RuntimeError runtimeError) {
-    logger
-        .getOrThrow()
-        .atSevere()
-        .log("An error occured while booting modolus %s", runtimeError.name());
+  private void handleRuntimeInitializationError(@NotNull Error<RuntimeError> runtimeError) {
+    LoggerUtils.printError(logger, "An error occured while booting modolus");
+    LoggerUtils.printError(logger, runtimeError);
     HytaleServer.get()
         .shutdownServer(
             new ShutdownReason(
-                1, "An error occured while booting modolus %s".formatted(runtimeError.name())));
+                1,
+                "An error occured while booting modolus %s".formatted(runtimeError.getMessage())));
   }
 }
