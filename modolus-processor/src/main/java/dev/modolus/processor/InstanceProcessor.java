@@ -24,6 +24,7 @@ import dev.modolus.processor.event.EventProcessor;
 import dev.modolus.processor.manifest.HytalePluginProcessor;
 import dev.modolus.processor.manifest.PluginManifest;
 import dev.modolus.processor.singleton.*;
+import dev.modolus.processor.ui.UIProcessor;
 import dev.modolus.util.result.Error;
 import java.io.OutputStream;
 import java.util.*;
@@ -47,14 +48,15 @@ import tools.jackson.databind.ObjectWriter;
   INJECT_SINGLETON_ANNOTATION,
   CREATE_ON_RUNTIME_ANNOTATION,
   SCOPE_ANNOTATION,
-  HYTALE_PLUGIN_ANNOTATION
+  HYTALE_PLUGIN_ANNOTATION,
+  UI_ANNOTATION
 })
 @SupportedSourceVersion(SourceVersion.RELEASE_25)
 @SupportedOptions({"projectVersion"})
 public class InstanceProcessor extends AbstractProcessor {
 
   private static final List<String> CREATION_ANNOTATIONS =
-      List.of(COMMAND_ANNOTATION, EVENT_LISTENER_ANNOTATION);
+      List.of(COMMAND_ANNOTATION, EVENT_LISTENER_ANNOTATION, UI_ANNOTATION);
 
   private static final List<String> MODIFIER_ANNOTATION =
       List.of(
@@ -87,7 +89,8 @@ public class InstanceProcessor extends AbstractProcessor {
             INJECT_SINGLETONS_ANNOTATION, new InjectSingletonsProcessor(processingEnv),
             CREATE_ON_RUNTIME_ANNOTATION, new CreateOnRuntimeProcessor(processingEnv),
             SCOPE_ANNOTATION, new ScopeProcessor(processingEnv),
-            HYTALE_PLUGIN_ANNOTATION, new HytalePluginProcessor(processingEnv));
+            HYTALE_PLUGIN_ANNOTATION, new HytalePluginProcessor(processingEnv),
+            UI_ANNOTATION, new UIProcessor(processingEnv));
 
     var sharedContext =
         new SharedContext(new HashMap<>(), new HashSet<>(), new HashSet<>(), new Holder<>());
