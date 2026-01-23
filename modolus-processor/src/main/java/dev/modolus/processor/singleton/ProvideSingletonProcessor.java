@@ -31,6 +31,7 @@ import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import org.jetbrains.annotations.NotNull;
 
@@ -142,7 +143,8 @@ public class ProvideSingletonProcessor extends Processor {
 
   private @NotNull MethodSpec registerSingletonMethodWithCustomIdentifier(
       @NotNull TypeMirror type, @NotNull String identifier, @NotNull SingletonScope scope) {
-    return MethodSpec.methodBuilder("getLazy" + TypeName.get(type).toString())
+    // TODO add safer version
+    return MethodSpec.methodBuilder("getLazy" + ((DeclaredType) type).asElement().getSimpleName())
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
         .returns(ParameterizedTypeName.get(ClassName.get(Lazy.class), TypeName.get(type)))
         .addStatement(
@@ -157,7 +159,8 @@ public class ProvideSingletonProcessor extends Processor {
 
   private @NotNull MethodSpec registerSingletonMethodWithoutCustomIdentifier(
       @NotNull TypeMirror type, @NotNull SingletonScope scope) {
-    return MethodSpec.methodBuilder("getLazy" + TypeName.get(type).toString())
+    // TODO add safer version
+    return MethodSpec.methodBuilder("getLazy" + ((DeclaredType) type).asElement().getSimpleName())
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
         .returns(ParameterizedTypeName.get(ClassName.get(Lazy.class), TypeName.get(type)))
         .addStatement(
