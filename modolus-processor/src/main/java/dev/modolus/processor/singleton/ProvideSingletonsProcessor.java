@@ -51,8 +51,13 @@ public class ProvideSingletonsProcessor extends ProvideSingletonProcessor {
               ensureImplementsSingleton(sourceFileWriter);
               Arrays.stream(singletonForCollection.value())
                   .distinct()
-                  .map(singleton -> registerSingleton(annotated, singleton))
-                  .forEach(sourceFileWriter.getConstructor()::addStatement);
+                  .forEach(
+                      singleton -> {
+                        sourceFileWriter
+                            .getConstructor()
+                            .addStatement(registerSingleton(annotated, singleton));
+                        addStaticAccessMethod(singleton, sourceFileWriter);
+                      });
             });
   }
 }

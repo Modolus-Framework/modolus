@@ -17,19 +17,20 @@
 
 package dev.modolus.processor.singleton;
 
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.*;
 import dev.modolus.annotations.singleton.ProvideSingleton;
 import dev.modolus.processor.Processor;
 import dev.modolus.processor.ProcessorUtils;
 import dev.modolus.processor.SharedContext;
 import dev.modolus.processor.SourceFileWriter;
+import dev.modolus.util.singleton.Lazy;
 import dev.modolus.util.singleton.Singleton;
 import dev.modolus.util.singleton.SingletonScope;
 import dev.modolus.util.singleton.Singletons;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,11 +63,27 @@ public class ProvideSingletonProcessor extends Processor {
               sourceFileWriter
                   .getConstructor()
                   .addStatement(registerSingleton(annotated, singletonFor));
+              addStaticAccessMethod(singletonFor, sourceFileWriter);
             });
   }
 
-  protected void ensureImplementsSingleton(SourceFileWriter writer) {
+  protected void ensureImplementsSingleton(@NotNull SourceFileWriter writer) {
     writer.getClassBuilder().addSuperinterface(ClassName.get(Singleton.class));
+  }
+
+  protected void addStaticAccessMethod(
+      @NotNull ProvideSingleton singleton, @NotNull SourceFileWriter writer) {
+    var type = ProcessorUtils.getTypeMirror(singleton::value);
+    assert type != null;
+
+    if (singleton.singletonIdentifier().isBlank()) {
+      writer.addMethod(registerSingletonMethodWithoutCustomIdentifier(type, singleton.scope()));
+      return;
+    }
+
+    writer.addMethod(
+        registerSingletonMethodWithCustomIdentifier(
+            type, singleton.singletonIdentifier(), singleton.scope()));
   }
 
   protected CodeBlock registerSingleton(
@@ -121,5 +138,34 @@ public class ProvideSingletonProcessor extends Processor {
         type,
         SINGLETON_SCOPE_CLASS_NAME,
         scope.name());
+  }
+
+  private @NotNull MethodSpec registerSingletonMethodWithCustomIdentifier(
+      @NotNull TypeMirror type, @NotNull String identifier, @NotNull SingletonScope scope) {
+    return MethodSpec.methodBuilder("getLazy" + TypeName.get(type).toString())
+        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+        .returns(ParameterizedTypeName.get(ClassName.get(Lazy.class), TypeName.get(type)))
+        .addStatement(
+            "return $T.of($T.class, $T.$L, $S)",
+            ClassName.get(Lazy.class),
+            type,
+            ClassName.get(SingletonScope.class),
+            scope.name(),
+            identifier)
+        .build();
+  }
+
+  private @NotNull MethodSpec registerSingletonMethodWithoutCustomIdentifier(
+      @NotNull TypeMirror type, @NotNull SingletonScope scope) {
+    return MethodSpec.methodBuilder("getLazy" + TypeName.get(type).toString())
+        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+        .returns(ParameterizedTypeName.get(ClassName.get(Lazy.class), TypeName.get(type)))
+        .addStatement(
+            "return $T.of($T.class, $T.$L)",
+            ClassName.get(Lazy.class),
+            type,
+            ClassName.get(SingletonScope.class),
+            scope.name())
+        .build();
   }
 }

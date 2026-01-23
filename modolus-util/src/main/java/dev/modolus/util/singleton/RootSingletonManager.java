@@ -28,7 +28,8 @@ import org.jetbrains.annotations.NotNull;
 public final class RootSingletonManager extends ScopedSingletonManager {
 
   static final List<String> ROOT_PACKAGE_NAMES =
-      List.of("dev.modolus.util", "dev.modolus.core", "dev.modolus.annotations", "java");
+      List.of(
+          "dev.modolus.util", "dev.modolus.core", "dev.modolus.annotations", "java", "com.hypixel");
 
   private final Map<String, ScopedSingletonManager> scopes = new ConcurrentHashMap<>();
 
