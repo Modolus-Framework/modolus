@@ -30,7 +30,15 @@ public enum ComponentPropertyType {
   FLEX_WEIGHT("FlexWeight"),
   VISIBLE("Visible"),
   ENABLED("Enabled"),
-  OPACITY("Opacity");
+  OPACITY("Opacity"),
+  TEXT("Text"),
+  STYLE("Style"),
+  TEXTURE_PATH("TexturePath"),
+  TINT("Tint"),
+  PLACEHOLDER_TEXT("PlaceholderText"),
+  VALUE("Value"),
+  MIN_VALUE("MinValue"),
+  MAX_VALUE("MaxValue");
 
   private final String propertyName;
 }

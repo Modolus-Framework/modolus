@@ -17,27 +17,23 @@
 
 package dev.modolus.util.ui.component.properties;
 
+import dev.modolus.util.ui.Color;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-public record VisibleProperties(boolean isVisible) implements ComponentProperty {
+public record TintProperties(@NotNull Color color) implements ComponentProperty {
   @Override
   public @NotNull ComponentPropertyType getPropertyType() {
-    return ComponentPropertyType.VISIBLE;
+    return ComponentPropertyType.TINT;
   }
 
   @Override
   public @NotNull String serializeProperties() {
-    return String.format("%b", isVisible);
+    return color.serialize();
   }
 
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties visible() {
-    return new VisibleProperties(true);
-  }
-
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties hidden() {
-    return new VisibleProperties(false);
+  @Contract("_ -> new")
+  public static @NotNull TintProperties of(Color color) {
+    return new TintProperties(color);
   }
 }

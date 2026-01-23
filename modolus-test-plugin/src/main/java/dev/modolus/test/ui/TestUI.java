@@ -18,11 +18,13 @@
 package dev.modolus.test.ui;
 
 import static dev.modolus.util.ui.component.Components.group;
+import static dev.modolus.util.ui.component.Components.textButton;
 
 import dev.modolus.annotations.singleton.CreateOnRuntime;
 import dev.modolus.annotations.singleton.ProvideSingleton;
 import dev.modolus.annotations.ui.UI;
 import dev.modolus.util.ui.component.GroupComponent;
+import dev.modolus.util.ui.component.properties.*;
 
 @UI(GroupComponent.class) @ProvideSingleton(TestUI.class)
 @CreateOnRuntime
@@ -31,7 +33,19 @@ public class TestUI extends AbstractTestUI {
   public TestUI() {
     super(
         group()
-            .withProperties(component -> component.anchor(100, 100).backgroundNamed("test"))
-            .orElseThrow());
+            .withProperties(
+                component ->
+                    component
+                        .property(AnchorProperties.ofMargin(100, 100))
+                        .namedProperty("test", ComponentPropertyType.BACKGROUND))
+            .orElseThrow()
+            .child(
+                textButton("testButton")
+                    .withProperties(
+                        component -> component.property(TextProperties.of("Hello world!")))
+                    .orElseThrow()));
+
+    constant("test", PatchStyle.ofAllSideBorder("Common/Button.png", 10));
+    updateInlineUICache();
   }
 }

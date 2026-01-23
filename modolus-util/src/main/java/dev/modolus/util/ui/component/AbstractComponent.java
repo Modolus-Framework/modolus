@@ -17,11 +17,13 @@
 
 package dev.modolus.util.ui.component;
 
-import dev.modolus.util.result.ExceptionConsumer;
+import dev.modolus.util.result.ExceptionFunction;
 import dev.modolus.util.result.GenericError;
 import dev.modolus.util.result.Result;
 import dev.modolus.util.ui.component.properties.ComponentProperty;
 import dev.modolus.util.ui.component.properties.ComponentPropertyType;
+import dev.modolus.util.ui.component.properties.ComponentStyle;
+import dev.modolus.util.ui.component.properties.NamedProperty;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -40,10 +42,8 @@ public abstract class AbstractComponent<T extends AbstractComponent<T>> {
   protected final Map<String, Object> constants = new HashMap<>();
 
   public Result<T, GenericError> withProperties(
-      ExceptionConsumer<T, IllegalStateException> consumer) {
-    return Result.success(getInstance())
-        .mapExceptionVoid(consumer, IllegalStateException.class)
-        .map(unused -> getInstance());
+      ExceptionFunction<T, T, IllegalStateException> consumer) {
+    return Result.success(getInstance()).mapException(consumer, IllegalStateException.class);
   }
 
   public T property(@NotNull ComponentProperty property) {
@@ -55,6 +55,10 @@ public abstract class AbstractComponent<T extends AbstractComponent<T>> {
     }
     properties.put(property.getPropertyType(), property);
     return getInstance();
+  }
+
+  public T namedProperty(@NotNull String name, @NotNull ComponentPropertyType type) {
+    return property(NamedProperty.of(name, type));
   }
 
   public T constant(@NotNull String name, @NotNull Object obj) {
@@ -82,6 +86,7 @@ public abstract class AbstractComponent<T extends AbstractComponent<T>> {
         (name, value) -> {
           builder.append("  ".repeat(identLevel + 1)).append("@").append(name).append(" = ");
           if (value instanceof ComponentProperty property) {
+            if (value instanceof ComponentStyle style) builder.append(style.getStyleName());
             builder.append(property.serializeProperties());
           } else {
             builder.append(value.toString());

@@ -20,6 +20,7 @@ package dev.modolus.util.ui.component.properties;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Builder
@@ -71,5 +72,20 @@ public record PaddingProperties(
     }
 
     return String.format("(%s)", String.join(", ", props));
+  }
+
+  @Contract("_ -> new")
+  public static @NotNull PaddingProperties of(int padding) {
+    return PaddingProperties.builder().full(padding).build();
+  }
+
+  @Contract("_, _ -> new")
+  public static @NotNull PaddingProperties of(int horizonal, int vertical) {
+    return PaddingProperties.builder().horizonal(horizonal).vertical(vertical).build();
+  }
+
+  @Contract("_, _, _, _ -> new")
+  public static @NotNull PaddingProperties of(int top, int bottom, int left, int right) {
+    return PaddingProperties.builder().top(top).bottom(bottom).left(left).right(right).build();
   }
 }

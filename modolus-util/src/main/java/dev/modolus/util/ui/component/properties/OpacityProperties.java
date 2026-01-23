@@ -17,6 +17,7 @@
 
 package dev.modolus.util.ui.component.properties;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -30,5 +31,10 @@ public record OpacityProperties(@Range(from = 0, to = 1) float opacity)
   @Override
   public @NotNull String serializeProperties() {
     return String.format("%.2f", opacity);
+  }
+
+  @Contract("_ -> new")
+  public static @NotNull OpacityProperties of(@Range(from = 0, to = 1) float opacity) {
+    return new OpacityProperties(opacity);
   }
 }

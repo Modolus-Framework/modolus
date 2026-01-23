@@ -57,7 +57,7 @@ public sealed class ScopedSingletonManager permits RootSingletonManager {
 
   public <I, T extends I> Result<T, SingletonError> provideSingleton(
       Class<? extends I> forType, T value) {
-    return provideSingleton(forType, value, getDefaultSingletonNameFor(forType));
+    return provideSingleton(forType, value, getDefaultSingletonNameFor(value.getClass()));
   }
 
   public <I, T extends I> Result<T, SingletonError> provideSingleton(
@@ -90,7 +90,20 @@ public sealed class ScopedSingletonManager permits RootSingletonManager {
   }
 
   public <T> Result<T, SingletonError> getSingleton(Class<T> clazz) {
-    return getSingleton(clazz, getDefaultSingletonNameFor(clazz));
+    if (!singletonHolder.containsKey(clazz))
+      return Result.failure(
+          SingletonError.NO_INSTANCE_AVAILABLE.toError(clazz.getSimpleName(), scopeName));
+    var map = singletonHolder.get(clazz);
+
+    var value = map.values().stream().findFirst();
+
+    if (value.isEmpty())
+      return Result.failure(
+          SingletonError.NO_INSTANCE_AVAILABLE.toError(clazz.getSimpleName(), scopeName));
+
+    if (!clazz.isInstance(value.get()))
+      return Result.failure(SingletonError.INSTANCE_IS_NOT_THE_REQUESTED_TYPE.toError());
+    return Result.success(clazz.cast(value.get()));
   }
 
   public <T> Result<T, SingletonError> getSingleton(Class<T> clazz, String identifier) {

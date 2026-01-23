@@ -15,31 +15,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dev.modolus.processor;
+package dev.modolus.core.runtime;
 
-import dev.modolus.util.result.Error;
-import dev.modolus.util.result.ErrorType;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
-@Getter
-@RequiredArgsConstructor
-public enum ProcessorError implements ErrorType<ProcessorError> {
-  NO_COMMAND_ARG_TYPE_SET("No command argument type set for command %s"),
-  ELEMENT_ERROR("An element error occurred while processing the previous error."),
-  ;
+public class MemoryResourceClassLoader extends ClassLoader {
 
-  private final String errorMessage;
+  private final Map<String, byte[]> resources = new HashMap<>();
 
-  @Override
-  public @NotNull Error<ProcessorError> toError(Object... args) {
-    return new Error<>(this, args, null);
+  public MemoryResourceClassLoader(ClassLoader parent) {
+    super(parent);
+  }
+
+  public void add(String path, byte[] data) {
+    resources.put(path, data);
   }
 
   @Override
-  public @NotNull Error<ProcessorError> toErrorWithCause(@Nullable Error<?> cause, Object... args) {
-    return new Error<>(this, args, cause);
+  public @Nullable URL getResource(String name) {
+    return super.getResource(name);
+  }
+
+  @Override
+  public @Nullable InputStream getResourceAsStream(String name) {
+    byte[] data = resources.get(name);
+    return data != null ? new ByteArrayInputStream(data) : super.getResourceAsStream(name);
   }
 }

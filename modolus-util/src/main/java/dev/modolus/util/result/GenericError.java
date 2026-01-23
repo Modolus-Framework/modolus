@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 @RequiredArgsConstructor
 public enum GenericError implements ErrorType<GenericError> {
-  PREVIOUS_ERROR("An error occurred while processing the previous error."),
+  PREVIOUS_ERROR("A generic error occurred while processing the previous error."),
   EMPTY_COLLECTION("An empty collection was provided."),
   NULL_VALUE("A null value was provided."),
   OPTIONAL_EMPTY("An empty Optional was provided."),

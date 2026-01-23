@@ -15,29 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dev.modolus.util.ui.component.properties;
+package dev.modolus.util.asset;
 
-import org.jetbrains.annotations.Contract;
+import com.hypixel.hytale.server.core.asset.common.CommonAsset;
+import java.util.concurrent.CompletableFuture;
 import org.jetbrains.annotations.NotNull;
 
-public record VisibleProperties(boolean isVisible) implements ComponentProperty {
-  @Override
-  public @NotNull ComponentPropertyType getPropertyType() {
-    return ComponentPropertyType.VISIBLE;
+public class RuntimeAsset extends CommonAsset {
+
+  private final byte @NotNull [] bytes;
+
+  public RuntimeAsset(@NotNull String name, byte @NotNull [] bytes) {
+    super(name, bytes);
+    this.bytes = bytes;
   }
 
   @Override
-  public @NotNull String serializeProperties() {
-    return String.format("%b", isVisible);
-  }
-
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties visible() {
-    return new VisibleProperties(true);
-  }
-
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties hidden() {
-    return new VisibleProperties(false);
+  protected CompletableFuture<byte[]> getBlob0() {
+    return CompletableFuture.completedFuture(bytes);
   }
 }

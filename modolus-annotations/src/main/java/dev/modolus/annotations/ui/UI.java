@@ -28,4 +28,6 @@ import java.lang.annotation.Target;
 public @interface UI {
 
   Class<? extends AbstractComponent<?>> value();
+
+  String name() default "";
 }

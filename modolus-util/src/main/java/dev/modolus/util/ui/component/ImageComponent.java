@@ -19,31 +19,32 @@ package dev.modolus.util.ui.component;
 
 import dev.modolus.util.ui.component.properties.ComponentPropertyType;
 import java.util.Set;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
-public final class GroupComponent extends AbstractComponent<GroupComponent> {
+/**
+ * @deprecated use a {@link GroupComponent} with a {@link
+ *     dev.modolus.util.ui.component.properties.BackgroundProperties} instead
+ */
+@Deprecated(since = "0.0.2")
+public class ImageComponent extends AbstractComponent<ImageComponent> {
 
-  public GroupComponent() {
+  public ImageComponent() {
     this(null);
   }
 
-  public GroupComponent(@Nullable String id) {
+  public ImageComponent(@Nullable String id) {
     super(
-        "Group",
+        "Image",
         id,
         Set.of(
+            ComponentPropertyType.TEXTURE_PATH,
             ComponentPropertyType.ANCHOR,
-            ComponentPropertyType.BACKGROUND,
-            ComponentPropertyType.LAYOUT_MODE,
-            ComponentPropertyType.PADDING,
-            ComponentPropertyType.FLEX_WEIGHT,
-            ComponentPropertyType.VISIBLE,
-            ComponentPropertyType.ENABLED,
+            ComponentPropertyType.TINT,
             ComponentPropertyType.OPACITY));
   }
 
   @Override
-  protected GroupComponent getInstance() {
+  protected ImageComponent getInstance() {
     return this;
   }
 }

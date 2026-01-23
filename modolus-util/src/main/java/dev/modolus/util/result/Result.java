@@ -58,8 +58,7 @@ public class Result<T, E extends Enum<E> & ErrorType<E>> {
       return success(supplier.get());
     } catch (Exception e) {
       if (exceptionClass.isInstance(e))
-        return Result.failure(
-            GenericError.EXCEPTION_THROWN.toError(exceptionClass.cast(e).getMessage()));
+        return Result.failure(GenericError.EXCEPTION_THROWN.toError(getExceptionMessage(e)));
       throw new UnexpectedErrorException(e);
     }
   }
@@ -70,8 +69,7 @@ public class Result<T, E extends Enum<E> & ErrorType<E>> {
       return ofNullable(supplier.get());
     } catch (Exception e) {
       if (exceptionClass.isInstance(e))
-        return Result.failure(
-            GenericError.EXCEPTION_THROWN.toError(exceptionClass.cast(e).getMessage()));
+        return Result.failure(GenericError.EXCEPTION_THROWN.toError(getExceptionMessage(e)));
       throw new UnexpectedErrorException(e);
     }
   }
@@ -83,8 +81,7 @@ public class Result<T, E extends Enum<E> & ErrorType<E>> {
       return success();
     } catch (Exception e) {
       if (exceptionClass.isInstance(e))
-        return Result.failure(
-            GenericError.EXCEPTION_THROWN.toError(exceptionClass.cast(e).getMessage()));
+        return Result.failure(GenericError.EXCEPTION_THROWN.toError(getExceptionMessage(e)));
       throw new UnexpectedErrorException(e);
     }
   }
@@ -239,5 +236,13 @@ public class Result<T, E extends Enum<E> & ErrorType<E>> {
   @Override
   public int hashCode() {
     return Objects.hash(value, getError());
+  }
+
+  private static String getExceptionMessage(Throwable throwable) {
+    if (throwable == null) return "No exception message available.";
+
+    return throwable.getMessage() == null
+        ? getExceptionMessage(throwable.getCause())
+        : throwable.getMessage();
   }
 }

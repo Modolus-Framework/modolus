@@ -20,24 +20,19 @@ package dev.modolus.util.ui.component.properties;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-public record VisibleProperties(boolean isVisible) implements ComponentProperty {
+public record PlaceholderTextPropeties(@NotNull String text) implements ComponentProperty {
   @Override
   public @NotNull ComponentPropertyType getPropertyType() {
-    return ComponentPropertyType.VISIBLE;
+    return ComponentPropertyType.PLACEHOLDER_TEXT;
   }
 
   @Override
   public @NotNull String serializeProperties() {
-    return String.format("%b", isVisible);
+    return '"' + text + '"';
   }
 
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties visible() {
-    return new VisibleProperties(true);
-  }
-
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties hidden() {
-    return new VisibleProperties(false);
+  @Contract("_ -> new")
+  public static @NotNull PlaceholderTextPropeties of(String text) {
+    return new PlaceholderTextPropeties(text);
   }
 }

@@ -33,4 +33,106 @@ public final class Components {
   public static @NotNull GroupComponent group(@NotNull String id) {
     return new GroupComponent(id);
   }
+
+  @Contract(" -> new")
+  public static @NotNull CheckBoxComponent checkBox() {
+    return new CheckBoxComponent();
+  }
+
+  @Contract("_ -> new")
+  public static @NotNull CheckBoxComponent checkBox(@NotNull String id) {
+    return new CheckBoxComponent(id);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull SliderComponent slider() {
+    return new SliderComponent();
+  }
+
+  @Contract("_ -> new")
+  public static @NotNull SliderComponent slider(@NotNull String id) {
+    return new SliderComponent(id);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull DropdownBoxComponent dropdownBox() {
+    return new DropdownBoxComponent();
+  }
+
+  @Contract("_ -> new")
+  public static @NotNull DropdownBoxComponent dropdownBox(@NotNull String id) {
+    return new DropdownBoxComponent(id);
+  }
+
+  /**
+   * @deprecated use a {@link GroupComponent} with a {@link
+   *     dev.modolus.util.ui.component.properties.BackgroundProperties} instead
+   * @return a new ImageComponent
+   */
+  @Deprecated(since = "0.0.2")
+  @Contract(" -> new")
+  public static @NotNull ImageComponent image() {
+    return new ImageComponent();
+  }
+
+  /**
+   * @deprecated use a {@link GroupComponent} with a {@link
+   *     dev.modolus.util.ui.component.properties.BackgroundProperties} instead
+   * @return a new ImageComponent
+   */
+  @Deprecated(since = "0.0.2")
+  @Contract("_ -> new")
+  public static @NotNull ImageComponent image(@NotNull String id) {
+    return new ImageComponent(id);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull LabelComponent label() {
+    return new LabelComponent();
+  }
+
+  @Contract("_ -> new")
+  public static @NotNull LabelComponent label(@NotNull String id) {
+    return new LabelComponent(id);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull NumberFieldComponent numberField() {
+    return new NumberFieldComponent();
+  }
+
+  @Contract("_ -> new")
+  public static @NotNull NumberFieldComponent numberField(@NotNull String id) {
+    return new NumberFieldComponent(id);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull TextFieldComponent textField() {
+    return new TextFieldComponent();
+  }
+
+  @Contract("_ -> new")
+  public static @NotNull TextFieldComponent textField(@NotNull String id) {
+    return new TextFieldComponent(id);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull ScrollViewComponent scrollView() {
+    return new ScrollViewComponent();
+  }
+
+  @Contract("_ -> new")
+  public static @NotNull ScrollViewComponent scrollView(@NotNull String id) {
+    return new ScrollViewComponent(id);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull TextButtonComponent textButton() {
+    return new TextButtonComponent();
+  }
+
+  @Contract("_ -> new")
+  public static @NotNull TextButtonComponent textButton(@NotNull String id) {
+    return new TextButtonComponent(id);
+  }
 }

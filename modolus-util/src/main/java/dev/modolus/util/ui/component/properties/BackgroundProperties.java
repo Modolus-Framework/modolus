@@ -18,6 +18,7 @@
 package dev.modolus.util.ui.component.properties;
 
 import dev.modolus.util.ui.Color;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public record BackgroundProperties(@NotNull Color color) implements ComponentProperty {
@@ -29,5 +30,10 @@ public record BackgroundProperties(@NotNull Color color) implements ComponentPro
   @Override
   public @NotNull String serializeProperties() {
     return color.serialize();
+  }
+
+  @Contract("_ -> new")
+  public static @NotNull BackgroundProperties of(Color color) {
+    return new BackgroundProperties(color);
   }
 }

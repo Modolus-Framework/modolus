@@ -15,29 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dev.modolus.util.ui.component.properties;
+package dev.modolus.util.ui.component;
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import dev.modolus.util.ui.component.properties.ComponentPropertyType;
+import java.util.Set;
+import org.jetbrains.annotations.Nullable;
 
-public record VisibleProperties(boolean isVisible) implements ComponentProperty {
-  @Override
-  public @NotNull ComponentPropertyType getPropertyType() {
-    return ComponentPropertyType.VISIBLE;
+public class CheckBoxComponent extends AbstractComponent<CheckBoxComponent> {
+
+  public CheckBoxComponent() {
+    this(null);
+  }
+
+  public CheckBoxComponent(@Nullable String id) {
+    super(
+        "CheckBox",
+        id,
+        Set.of(
+            ComponentPropertyType.VALUE,
+            ComponentPropertyType.ANCHOR,
+            ComponentPropertyType.STYLE));
   }
 
   @Override
-  public @NotNull String serializeProperties() {
-    return String.format("%b", isVisible);
-  }
-
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties visible() {
-    return new VisibleProperties(true);
-  }
-
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties hidden() {
-    return new VisibleProperties(false);
+  protected CheckBoxComponent getInstance() {
+    return this;
   }
 }

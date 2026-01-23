@@ -17,9 +17,10 @@
 
 package dev.modolus.util.ui.component.properties;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-public record EnabledProperties(boolean enabled) implements ComponentProperty {
+public record EnabledProperties(boolean isEnabled) implements ComponentProperty {
   @Override
   public @NotNull ComponentPropertyType getPropertyType() {
     return ComponentPropertyType.ENABLED;
@@ -27,6 +28,16 @@ public record EnabledProperties(boolean enabled) implements ComponentProperty {
 
   @Override
   public @NotNull String serializeProperties() {
-    return String.format("%b", enabled);
+    return String.format("%b", isEnabled);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull EnabledProperties enabled() {
+    return new EnabledProperties(true);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull EnabledProperties disabled() {
+    return new EnabledProperties(false);
   }
 }

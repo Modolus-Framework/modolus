@@ -17,23 +17,30 @@
 
 package dev.modolus.processor.ui;
 
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.ParameterSpec;
-import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.*;
 import dev.modolus.annotations.ui.UI;
 import dev.modolus.processor.Processor;
 import dev.modolus.processor.ProcessorUtils;
 import dev.modolus.processor.SharedContext;
 import dev.modolus.processor.SourceFileWriter;
+import dev.modolus.util.singleton.Lazy;
 import dev.modolus.util.ui.UIRoot;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import org.jetbrains.annotations.NotNull;
 
 public class UIProcessor extends Processor {
 
   private static final ClassName UI_ROOT_NAME = ClassName.get(UIRoot.class);
+  private static final ClassName JAVA_PLUGIN_CLASS_NAME =
+      ClassName.get("com.hypixel.hytale.server.core.plugin", "JavaPlugin");
+  private static final ClassName LAZY_TYPE_NAME = ClassName.get(Lazy.class);
+  private static final ClassName RUNTIME_ASSET_NAME =
+      ClassName.get("dev.modolus.util.asset", "RuntimeAsset");
+  private static final ClassName COMMON_ASSET_REGISTRY_NAME =
+      ClassName.get("com.hypixel.hytale.server.core.asset.common", "CommonAssetRegistry");
 
   public UIProcessor(ProcessingEnvironment processingEnv) {
     super(processingEnv);
@@ -55,11 +62,39 @@ public class UIProcessor extends Processor {
 
     writer
         .getClassBuilder()
-        .superclass(ParameterizedTypeName.get(UI_ROOT_NAME, ClassName.get(rootComponent)));
+        .superclass(ParameterizedTypeName.get(UI_ROOT_NAME, TypeName.get(rootComponent)));
 
     writer
         .getConstructor()
-        .addParameter(ParameterSpec.builder(ClassName.get(rootComponent), "root").build())
+        .addParameter(ParameterSpec.builder(TypeName.get(rootComponent), "root").build())
         .addStatement("super(root)");
+
+    String basePath = "UI/Custom/";
+    String subPath =
+        (ui.name().isBlank() ? annotated.getSimpleName().toString() : ui.name()) + ".ui";
+
+    basePath += subPath;
+
+    writer.addField(
+        FieldSpec.builder(ClassName.get(String.class), "PATH")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+            .initializer("$S", subPath)
+            .build());
+
+    writer.addMethod(
+        MethodSpec.methodBuilder("onInitialization")
+            .addModifiers(Modifier.PUBLIC)
+            .addAnnotation(Override.class)
+            .returns(TypeName.VOID)
+            .addStatement(
+                "var plugin = $T.ofPlugin($T.class).getOrThrow()",
+                LAZY_TYPE_NAME,
+                JAVA_PLUGIN_CLASS_NAME)
+            .addStatement(
+                "var asset = new $T($S, getInlineUI().getBytes())", RUNTIME_ASSET_NAME, basePath)
+            .addStatement(
+                "$T.addCommonAsset(plugin.getIdentifier().toString(), asset)",
+                COMMON_ASSET_REGISTRY_NAME)
+            .build());
   }
 }

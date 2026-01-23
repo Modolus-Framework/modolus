@@ -20,6 +20,7 @@ package dev.modolus.util.ui.component.properties;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +32,7 @@ public record AnchorProperties(
     @Nullable Integer bottom,
     @Nullable Integer left,
     @Nullable Integer right,
-    @Nullable Integer horizonal,
+    @Nullable Integer horizontal,
     @Nullable Integer vertical)
     implements ComponentProperty {
 
@@ -68,8 +69,8 @@ public record AnchorProperties(
       props.add(String.format("Right: %d", right));
     }
 
-    if (horizonal != null) {
-      props.add(String.format("Horizonal: %d", horizonal));
+    if (horizontal != null) {
+      props.add(String.format("Horizontal: %d", horizontal));
     }
 
     if (vertical != null) {
@@ -77,5 +78,20 @@ public record AnchorProperties(
     }
 
     return String.format("(%s)", String.join(", ", props));
+  }
+
+  @Contract("_, _ -> new")
+  public static @NotNull AnchorProperties ofFixed(int width, int height) {
+    return AnchorProperties.builder().width(width).height(height).build();
+  }
+
+  @Contract("_, _, _, _ -> new")
+  public static @NotNull AnchorProperties ofMargin(int top, int bottom, int left, int right) {
+    return AnchorProperties.builder().top(top).bottom(bottom).left(left).right(right).build();
+  }
+
+  @Contract("_, _ -> new")
+  public static @NotNull AnchorProperties ofMargin(int horizontal, int vertical) {
+    return AnchorProperties.builder().horizontal(horizontal).vertical(vertical).build();
   }
 }

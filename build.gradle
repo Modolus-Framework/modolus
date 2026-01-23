@@ -123,11 +123,10 @@ subprojects { sub ->
     }
 }
 
-def hytaleServerPath = getHytaleServerPath(file("hytale.properties"))
 def hytaleAssetsPath = getHytaleAssetsPath(file("hytale.properties"))
 
 dependencies {
-    implementation files(hytaleServerPath)
+    implementation 'com.hypixel.hytale:HytaleServer:2026.01.17-4b0f30090-SNAPSHOT'
     implementation project(":modolus-core")
     implementation project(":modolus-test-plugin")
 }
@@ -142,33 +141,6 @@ idea.project.settings.runConfigurations {
         programParameters = "--allow-op --disable-sentry --assets=$hytaleAssetsPath --mods=${file("src/main/").absolutePath}  --auth-mode=authenticated"
         workingDirectory = serverRunDir.absolutePath
     }
-}
-
-static GString getHytaleServerPath(propertiesFile) {
-    if (System.getenv("SKIP_SERVER_TASK") != null) return GString.EMPTY
-
-    if (!propertiesFile.exists()) {
-        if (!propertiesFile.createNewFile()) {
-            throw new GradleException("Failed to create hytale.properties")
-        }
-
-        def defaultProperties = new Properties()
-        defaultProperties.setProperty("hytale.home", "")
-        defaultProperties.setProperty("hytale.patch-line", "release")
-        defaultProperties.setProperty("hytale.build", "latest")
-
-        propertiesFile.withOutputStream { defaultProperties.store(it, "Hytale properties") }
-        throw new GradleException("Set hytale.home in your hytale.properties")
-    }
-
-    def hytaleProperties = new Properties()
-    propertiesFile.withInputStream { hytaleProperties.load(it) }
-
-    def hytaleHome = hytaleProperties.get('hytale.home')
-    def hytalePatchLine = hytaleProperties.get('hytale.patch-line')
-    def hytaleBuild = hytaleProperties.get('hytale.build')
-
-    return "$hytaleHome/install/$hytalePatchLine/package/game/$hytaleBuild/Server/HytaleServer.jar"
 }
 
 static GString getHytaleAssetsPath(propertiesFile) {

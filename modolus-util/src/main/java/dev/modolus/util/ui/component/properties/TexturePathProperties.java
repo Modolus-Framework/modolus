@@ -20,24 +20,19 @@ package dev.modolus.util.ui.component.properties;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-public record VisibleProperties(boolean isVisible) implements ComponentProperty {
+public record TexturePathProperties(@NotNull String texturePath) implements ComponentProperty {
   @Override
   public @NotNull ComponentPropertyType getPropertyType() {
-    return ComponentPropertyType.VISIBLE;
+    return ComponentPropertyType.TEXTURE_PATH;
   }
 
   @Override
   public @NotNull String serializeProperties() {
-    return String.format("%b", isVisible);
+    return '"' + texturePath + '"';
   }
 
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties visible() {
-    return new VisibleProperties(true);
-  }
-
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties hidden() {
-    return new VisibleProperties(false);
+  @Contract("_ -> new")
+  public static @NotNull TexturePathProperties of(String texturePath) {
+    return new TexturePathProperties(texturePath);
   }
 }

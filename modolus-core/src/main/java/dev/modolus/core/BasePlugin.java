@@ -23,17 +23,23 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import dev.modolus.core.event.EventListener;
 import dev.modolus.core.logger.Logger;
 import dev.modolus.core.logger.LoggerUtils;
+import dev.modolus.core.runtime.MemoryResourceClassLoader;
 import dev.modolus.core.runtime.Runtime;
 import dev.modolus.util.singleton.LazySet;
 import dev.modolus.util.singleton.Singleton;
 import dev.modolus.util.singleton.SingletonScope;
 import dev.modolus.util.singleton.Singletons;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class BasePlugin extends JavaPlugin implements Singleton {
 
+  @Getter private final MemoryResourceClassLoader memoryResourceClassLoader;
+
   protected BasePlugin(@NotNull JavaPluginInit init) {
     super(init);
+    memoryResourceClassLoader = new MemoryResourceClassLoader(getClass().getClassLoader());
+    Thread.currentThread().setContextClassLoader(memoryResourceClassLoader);
   }
 
   protected void initializeManualDependencies() {}
@@ -41,6 +47,7 @@ public abstract class BasePlugin extends JavaPlugin implements Singleton {
   protected final void setupPlugin() {
     Logger.providePluginLogger(getLogger());
     Singletons.provideSingleton(JavaPlugin.class, this, SingletonScope.PLUGIN).orElseThrow();
+    Singletons.provideSingleton(BasePlugin.class, this, SingletonScope.PLUGIN).orElseThrow();
     initializeManualDependencies();
 
     // Initialize runtime

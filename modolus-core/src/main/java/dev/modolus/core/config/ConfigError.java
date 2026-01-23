@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 @RequiredArgsConstructor
 public enum ConfigError implements ErrorType<ConfigError> {
-  PREVIOUS_ERROR("An error occurred while processing the previous error."),
+  PREVIOUS_ERROR("A config error occurred while processing the previous error."),
   CONFIG_CLASS_MISSING_CONFIG_ANNOTATION("Configuration class is missing @Config annotation"),
   FAILED_LOADING_CONFIGURATION("Failed to load configuration for path: %s"),
   FAILED_SAVING_CONFIGURATION("Failed to save configuration for path: %s");

@@ -19,6 +19,7 @@ package dev.modolus.util.ui.component.properties;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public record LayoutModeProperties(@NotNull Mode mode) implements ComponentProperty {
@@ -30,6 +31,36 @@ public record LayoutModeProperties(@NotNull Mode mode) implements ComponentPrope
   @Override
   public @NotNull String serializeProperties() {
     return mode.getName();
+  }
+
+  @Contract(" -> new")
+  public static @NotNull LayoutModeProperties top() {
+    return new LayoutModeProperties(Mode.TOP);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull LayoutModeProperties bottom() {
+    return new LayoutModeProperties(Mode.BOTTOM);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull LayoutModeProperties left() {
+    return new LayoutModeProperties(Mode.LEFT);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull LayoutModeProperties right() {
+    return new LayoutModeProperties(Mode.RIGHT);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull LayoutModeProperties center() {
+    return new LayoutModeProperties(Mode.CENTER);
+  }
+
+  @Contract(" -> new")
+  public static @NotNull LayoutModeProperties overlay() {
+    return new LayoutModeProperties(Mode.OVERLAY);
   }
 
   @Getter

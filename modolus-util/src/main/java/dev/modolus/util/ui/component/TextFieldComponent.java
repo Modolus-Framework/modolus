@@ -15,29 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dev.modolus.util.ui.component.properties;
+package dev.modolus.util.ui.component;
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import dev.modolus.util.ui.component.properties.ComponentPropertyType;
+import java.util.Set;
+import org.jetbrains.annotations.Nullable;
 
-public record VisibleProperties(boolean isVisible) implements ComponentProperty {
-  @Override
-  public @NotNull ComponentPropertyType getPropertyType() {
-    return ComponentPropertyType.VISIBLE;
+public class TextFieldComponent extends AbstractComponent<TextFieldComponent> {
+
+  public TextFieldComponent() {
+    this(null);
+  }
+
+  public TextFieldComponent(@Nullable String id) {
+    super(
+        "TextField",
+        id,
+        Set.of(
+            ComponentPropertyType.PLACEHOLDER_TEXT,
+            ComponentPropertyType.ANCHOR,
+            ComponentPropertyType.STYLE,
+            ComponentPropertyType.FLEX_WEIGHT));
   }
 
   @Override
-  public @NotNull String serializeProperties() {
-    return String.format("%b", isVisible);
-  }
-
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties visible() {
-    return new VisibleProperties(true);
-  }
-
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties hidden() {
-    return new VisibleProperties(false);
+  protected TextFieldComponent getInstance() {
+    return this;
   }
 }

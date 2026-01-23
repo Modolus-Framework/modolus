@@ -17,6 +17,7 @@
 
 package dev.modolus.util.ui.component.properties;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public record FlexWeightProperties(int weight) implements ComponentProperty {
@@ -28,5 +29,10 @@ public record FlexWeightProperties(int weight) implements ComponentProperty {
   @Override
   public @NotNull String serializeProperties() {
     return String.format("%d", weight);
+  }
+
+  @Contract("_ -> new")
+  public static @NotNull FlexWeightProperties of(int weight) {
+    return new FlexWeightProperties(weight);
   }
 }

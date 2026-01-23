@@ -17,27 +17,9 @@
 
 package dev.modolus.util.ui.component.properties;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-public record VisibleProperties(boolean isVisible) implements ComponentProperty {
-  @Override
-  public @NotNull ComponentPropertyType getPropertyType() {
-    return ComponentPropertyType.VISIBLE;
-  }
+public interface ComponentStyle {
 
-  @Override
-  public @NotNull String serializeProperties() {
-    return String.format("%b", isVisible);
-  }
-
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties visible() {
-    return new VisibleProperties(true);
-  }
-
-  @Contract(" -> new")
-  public static @NotNull VisibleProperties hidden() {
-    return new VisibleProperties(false);
-  }
+  @NotNull String getStyleName();
 }

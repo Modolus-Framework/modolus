@@ -17,6 +17,7 @@
 
 package dev.modolus.util.ui.component.properties;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public record NamedProperty(@NotNull String name, @NotNull ComponentPropertyType type)
@@ -29,5 +30,11 @@ public record NamedProperty(@NotNull String name, @NotNull ComponentPropertyType
   @Override
   public @NotNull String serializeProperties() {
     return String.format("@%s", name);
+  }
+
+  @Contract("_,_ -> new")
+  public static @NotNull NamedProperty of(
+      @NotNull String name, @NotNull ComponentPropertyType type) {
+    return new NamedProperty(name, type);
   }
 }

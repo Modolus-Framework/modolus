@@ -59,8 +59,7 @@ public final class RootSingletonManager extends ScopedSingletonManager {
   }
 
   public <T> @NotNull Result<T, SingletonError> getSingletonInPluginScope(Class<T> clazz) {
-    return getCallersScopeManager()
-        .flatMap(manager -> manager.getSingleton(clazz, getDefaultSingletonNameFor(clazz)));
+    return getCallersScopeManager().flatMap(manager -> manager.getSingleton(clazz));
   }
 
   public <T> @NotNull Result<T, SingletonError> getSingletonInPluginScope(

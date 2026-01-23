@@ -40,7 +40,8 @@ import org.jetbrains.annotations.NotNull;
           url = "https://github.com/LouisSchmieder")
     },
     website = "https://github.com/Modolus-Framework/modolus",
-    dependencies = {@PluginDependency(name = "dev.modolus:modolus-core", version = "*")})
+    dependencies = {@PluginDependency(name = "dev.modolus:modolus-core", version = "*")},
+    includesAssetPack = true)
 @Scope
 public class Plugin extends BasePlugin {
 
