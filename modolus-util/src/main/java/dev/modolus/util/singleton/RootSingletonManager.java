@@ -73,6 +73,22 @@ public final class RootSingletonManager extends ScopedSingletonManager {
     return getCallersScopeManager().map(manager -> manager.getSingletons(clazz));
   }
 
+  public <T> @NotNull Result<T, SingletonError> getSingletonInPluginScope(
+      Class<T> clazz, Class<?> scope) {
+    return getCallersScopeManager(scope).flatMap(manager -> manager.getSingleton(clazz));
+  }
+
+  public <T> @NotNull Result<T, SingletonError> getSingletonInPluginScope(
+      Class<T> clazz, String identifier, Class<?> scope) {
+    return getCallersScopeManager(scope)
+        .flatMap(manager -> manager.getSingleton(clazz, identifier));
+  }
+
+  public @NotNull <T> Result<Set<T>, SingletonError> getSingletonsInPluginScope(
+      @NotNull Class<T> clazz, Class<?> scope) {
+    return getCallersScopeManager(scope).map(manager -> manager.getSingletons(clazz));
+  }
+
   public @NotNull Result<Void, SingletonError> destructSingletonInPluginScope(
       @NotNull Singleton singleton) {
     return getCallersScopeManager().mapVoid(manager -> manager.destructSingleton(singleton));
@@ -111,6 +127,12 @@ public final class RootSingletonManager extends ScopedSingletonManager {
 
   private @NotNull Result<ScopedSingletonManager, SingletonError> getCallersScopeManager() {
     return getCallersPackageName().flatMap(this::findScopeNameByPackageName);
+  }
+
+  private @NotNull Result<ScopedSingletonManager, SingletonError> getCallersScopeManager(
+      @NotNull Class<?> scope) {
+    return Result.<String, SingletonError>success(scope.getPackageName())
+        .flatMap(this::findScopeNameByPackageName);
   }
 
   private @NotNull Result<String, SingletonError> getCallersPackageName() {

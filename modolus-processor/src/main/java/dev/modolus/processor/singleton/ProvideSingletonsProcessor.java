@@ -56,7 +56,7 @@ public class ProvideSingletonsProcessor extends ProvideSingletonProcessor {
                         sourceFileWriter
                             .getConstructor()
                             .addStatement(registerSingleton(annotated, singleton));
-                        addStaticAccessMethod(singleton, sourceFileWriter);
+                        addStaticAccessMethod(singleton, sourceFileWriter, annotated);
                       });
             });
   }

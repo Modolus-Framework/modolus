@@ -77,12 +77,34 @@ public class Singletons {
   }
 
   public static <T> @NotNull Result<T, SingletonError> getSingleton(
+      @NotNull Class<T> clazz, @NotNull SingletonScope firstCheck, @NotNull Class<?> scopeClass) {
+    if (firstCheck == SingletonScope.ROOT) return ROOT_SINGLETON_MANAGER.getSingleton(clazz);
+
+    return ROOT_SINGLETON_MANAGER
+        .getSingletonInPluginScope(clazz, scopeClass)
+        .recoverFlat(_ -> ROOT_SINGLETON_MANAGER.getSingleton(clazz));
+  }
+
+  public static <T> @NotNull Result<T, SingletonError> getSingleton(
       @NotNull Class<T> clazz, @NotNull String identifier, @NotNull SingletonScope firstCheck) {
     if (firstCheck == SingletonScope.ROOT)
       return ROOT_SINGLETON_MANAGER.getSingleton(clazz, identifier);
 
     return ROOT_SINGLETON_MANAGER
         .getSingletonInPluginScope(clazz, identifier)
+        .recoverFlat(_ -> ROOT_SINGLETON_MANAGER.getSingleton(clazz, identifier));
+  }
+
+  public static <T> @NotNull Result<T, SingletonError> getSingleton(
+      @NotNull Class<T> clazz,
+      @NotNull String identifier,
+      @NotNull SingletonScope firstCheck,
+      @NotNull Class<?> scopeClass) {
+    if (firstCheck == SingletonScope.ROOT)
+      return ROOT_SINGLETON_MANAGER.getSingleton(clazz, identifier);
+
+    return ROOT_SINGLETON_MANAGER
+        .getSingletonInPluginScope(clazz, identifier, scopeClass)
         .recoverFlat(_ -> ROOT_SINGLETON_MANAGER.getSingleton(clazz, identifier));
   }
 

@@ -31,12 +31,26 @@ public sealed class Lazy<T> permits ExactScopedLazy {
 
   protected final @NotNull Class<T> clazz;
   protected final @NotNull SingletonScope scope;
+  protected @Nullable Class<?> scopeClass = null;
   protected @Nullable String singletonIdentifier = null;
 
   public @NotNull Result<T, SingletonError> get() {
     return singletonIdentifier == null
-        ? Singletons.getSingleton(clazz, scope)
+        ? getWithoutSingletonIdentifier()
+        : getWithSingletonIdentifier();
+  }
+
+  private @NotNull Result<T, SingletonError> getWithSingletonIdentifier() {
+    assert singletonIdentifier != null;
+    return scopeClass != null
+        ? Singletons.getSingleton(clazz, singletonIdentifier, scope, scopeClass)
         : Singletons.getSingleton(clazz, singletonIdentifier, scope);
+  }
+
+  private @NotNull Result<T, SingletonError> getWithoutSingletonIdentifier() {
+    return scopeClass != null
+        ? Singletons.getSingleton(clazz, scope, scopeClass)
+        : Singletons.getSingleton(clazz, scope);
   }
 
   public T getOrThrow() {
@@ -51,7 +65,19 @@ public sealed class Lazy<T> permits ExactScopedLazy {
   @Contract("_, _ -> new")
   public static <T> @NotNull Lazy<T> ofPlugin(
       @NotNull Class<T> clazz, @NotNull String singletonIdentifier) {
-    return new Lazy<>(clazz, SingletonScope.PLUGIN, singletonIdentifier);
+    return new Lazy<>(clazz, SingletonScope.PLUGIN, null, singletonIdentifier);
+  }
+
+  @Contract("_, _ -> new")
+  public static <T> @NotNull Lazy<T> ofPlugin(
+      @NotNull Class<T> clazz, @NotNull Class<?> scopeClass) {
+    return new Lazy<>(clazz, SingletonScope.PLUGIN, scopeClass, null);
+  }
+
+  @Contract("_, _, _ -> new")
+  public static <T> @NotNull Lazy<T> ofPlugin(
+      @NotNull Class<T> clazz, @NotNull String singletonIdentifier, @NotNull Class<?> scopeClass) {
+    return new Lazy<>(clazz, SingletonScope.PLUGIN, scopeClass, singletonIdentifier);
   }
 
   @Contract("_ -> new")
@@ -62,7 +88,7 @@ public sealed class Lazy<T> permits ExactScopedLazy {
   @Contract("_, _ -> new")
   public static <T> @NotNull Lazy<T> ofRoot(
       @NotNull Class<T> clazz, @NotNull String singletonIdentifier) {
-    return new Lazy<>(clazz, SingletonScope.ROOT, singletonIdentifier);
+    return new Lazy<>(clazz, SingletonScope.ROOT, null, singletonIdentifier);
   }
 
   @Contract("_, _ -> new")
@@ -73,6 +99,21 @@ public sealed class Lazy<T> permits ExactScopedLazy {
   @Contract("_, _, _ -> new")
   public static <T> @NotNull Lazy<T> of(
       @NotNull Class<T> clazz, @NotNull SingletonScope scope, @NotNull String singletonIdentifier) {
-    return new Lazy<>(clazz, scope, singletonIdentifier);
+    return new Lazy<>(clazz, scope, null, singletonIdentifier);
+  }
+
+  @Contract("_, _, _ -> new")
+  public static <T> @NotNull Lazy<T> of(
+      @NotNull Class<T> clazz, @NotNull SingletonScope scope, @NotNull Class<?> scopeClass) {
+    return new Lazy<>(clazz, scope, scopeClass, null);
+  }
+
+  @Contract("_, _, _, _ -> new")
+  public static <T> @NotNull Lazy<T> of(
+      @NotNull Class<T> clazz,
+      @NotNull SingletonScope scope,
+      @NotNull String singletonIdentifier,
+      @NotNull Class<?> scopeClass) {
+    return new Lazy<>(clazz, scope, scopeClass, singletonIdentifier);
   }
 }

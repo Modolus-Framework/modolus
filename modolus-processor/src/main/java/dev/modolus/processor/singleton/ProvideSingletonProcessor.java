@@ -64,7 +64,7 @@ public class ProvideSingletonProcessor extends Processor {
               sourceFileWriter
                   .getConstructor()
                   .addStatement(registerSingleton(annotated, singletonFor));
-              addStaticAccessMethod(singletonFor, sourceFileWriter);
+              addStaticAccessMethod(singletonFor, sourceFileWriter, annotated);
             });
   }
 
@@ -73,18 +73,21 @@ public class ProvideSingletonProcessor extends Processor {
   }
 
   protected void addStaticAccessMethod(
-      @NotNull ProvideSingleton singleton, @NotNull SourceFileWriter writer) {
+      @NotNull ProvideSingleton singleton,
+      @NotNull SourceFileWriter writer,
+      @NotNull Element element) {
     var type = ProcessorUtils.getTypeMirror(singleton::value);
     assert type != null;
 
     if (singleton.singletonIdentifier().isBlank()) {
-      writer.addMethod(registerSingletonMethodWithoutCustomIdentifier(type, singleton.scope()));
+      writer.addMethod(
+          registerSingletonMethodWithoutCustomIdentifier(type, singleton.scope(), element));
       return;
     }
 
     writer.addMethod(
         registerSingletonMethodWithCustomIdentifier(
-            type, singleton.singletonIdentifier(), singleton.scope()));
+            type, singleton.singletonIdentifier(), singleton.scope(), element));
   }
 
   protected CodeBlock registerSingleton(
@@ -142,33 +145,38 @@ public class ProvideSingletonProcessor extends Processor {
   }
 
   private @NotNull MethodSpec registerSingletonMethodWithCustomIdentifier(
-      @NotNull TypeMirror type, @NotNull String identifier, @NotNull SingletonScope scope) {
+      @NotNull TypeMirror type,
+      @NotNull String identifier,
+      @NotNull SingletonScope scope,
+      @NotNull Element element) {
     // TODO add safer version
     return MethodSpec.methodBuilder("getLazy" + ((DeclaredType) type).asElement().getSimpleName())
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
         .returns(ParameterizedTypeName.get(ClassName.get(Lazy.class), TypeName.get(type)))
         .addStatement(
-            "return $T.of($T.class, $T.$L, $S)",
+            "return $T.of($T.class, $T.$L, $S, $T.class)",
             ClassName.get(Lazy.class),
             type,
             ClassName.get(SingletonScope.class),
             scope.name(),
-            identifier)
+            identifier,
+            element.asType())
         .build();
   }
 
   private @NotNull MethodSpec registerSingletonMethodWithoutCustomIdentifier(
-      @NotNull TypeMirror type, @NotNull SingletonScope scope) {
+      @NotNull TypeMirror type, @NotNull SingletonScope scope, @NotNull Element element) {
     // TODO add safer version
     return MethodSpec.methodBuilder("getLazy" + ((DeclaredType) type).asElement().getSimpleName())
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
         .returns(ParameterizedTypeName.get(ClassName.get(Lazy.class), TypeName.get(type)))
         .addStatement(
-            "return $T.of($T.class, $T.$L)",
+            "return $T.of($T.class, $T.$L, $T.class)",
             ClassName.get(Lazy.class),
             type,
             ClassName.get(SingletonScope.class),
-            scope.name())
+            scope.name(),
+            element.asType())
         .build();
   }
 }

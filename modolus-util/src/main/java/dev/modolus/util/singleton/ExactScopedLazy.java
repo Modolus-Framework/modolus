@@ -27,8 +27,9 @@ public final class ExactScopedLazy<T> extends Lazy<T> {
   private ExactScopedLazy(
       @NotNull Class<T> clazz,
       @NotNull SingletonScope scope,
+      @Nullable Class<?> scopeClass,
       @Nullable String singletonIdentifier) {
-    super(clazz, scope, singletonIdentifier);
+    super(clazz, scope, scopeClass, singletonIdentifier);
   }
 
   private ExactScopedLazy(@NotNull Class<T> clazz, @NotNull SingletonScope scope) {
@@ -50,7 +51,13 @@ public final class ExactScopedLazy<T> extends Lazy<T> {
   @Contract("_, _ -> new")
   public static <T> @NotNull ExactScopedLazy<T> ofPlugin(
       @NotNull Class<T> clazz, @NotNull String singletonIdentifier) {
-    return new ExactScopedLazy<>(clazz, SingletonScope.PLUGIN, singletonIdentifier);
+    return new ExactScopedLazy<>(clazz, SingletonScope.PLUGIN, null, singletonIdentifier);
+  }
+
+  @Contract("_, _, _ -> new")
+  public static <T> @NotNull ExactScopedLazy<T> ofPlugin(
+      @NotNull Class<T> clazz, @NotNull String singletonIdentifier, @NotNull Class<?> scopeClass) {
+    return new ExactScopedLazy<>(clazz, SingletonScope.PLUGIN, scopeClass, singletonIdentifier);
   }
 
   @Contract("_ -> new")
@@ -61,7 +68,7 @@ public final class ExactScopedLazy<T> extends Lazy<T> {
   @Contract("_, _ -> new")
   public static <T> @NotNull ExactScopedLazy<T> ofRoot(
       @NotNull Class<T> clazz, @NotNull String singletonIdentifier) {
-    return new ExactScopedLazy<>(clazz, SingletonScope.ROOT, singletonIdentifier);
+    return new ExactScopedLazy<>(clazz, SingletonScope.ROOT, null, singletonIdentifier);
   }
 
   @Contract("_, _ -> new")
@@ -73,6 +80,15 @@ public final class ExactScopedLazy<T> extends Lazy<T> {
   @Contract("_, _, _ -> new")
   public static <T> @NotNull ExactScopedLazy<T> of(
       @NotNull Class<T> clazz, @NotNull SingletonScope scope, @NotNull String singletonIdentifier) {
-    return new ExactScopedLazy<>(clazz, scope, singletonIdentifier);
+    return new ExactScopedLazy<>(clazz, scope, null, singletonIdentifier);
+  }
+
+  @Contract("_, _, _, _ -> new")
+  public static <T> @NotNull ExactScopedLazy<T> of(
+      @NotNull Class<T> clazz,
+      @NotNull SingletonScope scope,
+      @NotNull String singletonIdentifier,
+      @NotNull Class<?> scopeClass) {
+    return new ExactScopedLazy<>(clazz, scope, scopeClass, singletonIdentifier);
   }
 }
