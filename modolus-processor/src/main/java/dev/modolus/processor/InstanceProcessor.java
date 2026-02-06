@@ -21,6 +21,7 @@ import static dev.modolus.processor.Annotations.*;
 
 import dev.modolus.processor.command.CommandProcessor;
 import dev.modolus.processor.event.EventProcessor;
+import dev.modolus.processor.extend.ExtendProcessor;
 import dev.modolus.processor.manifest.HytalePluginProcessor;
 import dev.modolus.processor.manifest.PluginManifest;
 import dev.modolus.processor.singleton.*;
@@ -49,14 +50,15 @@ import tools.jackson.databind.ObjectWriter;
   CREATE_ON_RUNTIME_ANNOTATION,
   SCOPE_ANNOTATION,
   HYTALE_PLUGIN_ANNOTATION,
-  UI_ANNOTATION
+  UI_ANNOTATION,
+  EXTENDS_ANNOTATION
 })
 @SupportedSourceVersion(SourceVersion.RELEASE_25)
 @SupportedOptions({"projectVersion"})
 public class InstanceProcessor extends AbstractProcessor {
 
   private static final List<String> CREATION_ANNOTATIONS =
-      List.of(COMMAND_ANNOTATION, EVENT_LISTENER_ANNOTATION, UI_ANNOTATION);
+      List.of(COMMAND_ANNOTATION, EVENT_LISTENER_ANNOTATION, UI_ANNOTATION, EXTENDS_ANNOTATION);
 
   private static final List<String> MODIFIER_ANNOTATION =
       List.of(
@@ -79,18 +81,18 @@ public class InstanceProcessor extends AbstractProcessor {
   @Override
   public boolean process(
       @NotNull Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-    Map<String, Processor> processors =
-        Map.of(
-            COMMAND_ANNOTATION, new CommandProcessor(processingEnv),
-            EVENT_LISTENER_ANNOTATION, new EventProcessor(processingEnv),
-            PROVIDE_SINGLETON_ANNOTATION, new ProvideSingletonProcessor(processingEnv),
-            PROVIDE_SINGLETONS_ANNOTATION, new ProvideSingletonsProcessor(processingEnv),
-            INJECT_SINGLETON_ANNOTATION, new InjectSingletonProcessor(processingEnv),
-            INJECT_SINGLETONS_ANNOTATION, new InjectSingletonsProcessor(processingEnv),
-            CREATE_ON_RUNTIME_ANNOTATION, new CreateOnRuntimeProcessor(processingEnv),
-            SCOPE_ANNOTATION, new ScopeProcessor(processingEnv),
-            HYTALE_PLUGIN_ANNOTATION, new HytalePluginProcessor(processingEnv),
-            UI_ANNOTATION, new UIProcessor(processingEnv));
+    Map<String, Processor> processors = new HashMap<>();
+    processors.put(COMMAND_ANNOTATION, new CommandProcessor(processingEnv));
+    processors.put(EVENT_LISTENER_ANNOTATION, new EventProcessor(processingEnv));
+    processors.put(PROVIDE_SINGLETON_ANNOTATION, new ProvideSingletonProcessor(processingEnv));
+    processors.put(PROVIDE_SINGLETONS_ANNOTATION, new ProvideSingletonsProcessor(processingEnv));
+    processors.put(INJECT_SINGLETON_ANNOTATION, new InjectSingletonProcessor(processingEnv));
+    processors.put(INJECT_SINGLETONS_ANNOTATION, new InjectSingletonsProcessor(processingEnv));
+    processors.put(CREATE_ON_RUNTIME_ANNOTATION, new CreateOnRuntimeProcessor(processingEnv));
+    processors.put(SCOPE_ANNOTATION, new ScopeProcessor(processingEnv));
+    processors.put(HYTALE_PLUGIN_ANNOTATION, new HytalePluginProcessor(processingEnv));
+    processors.put(UI_ANNOTATION, new UIProcessor(processingEnv));
+    processors.put(EXTENDS_ANNOTATION, new ExtendProcessor(processingEnv));
 
     var sharedContext =
         new SharedContext(new HashMap<>(), new HashSet<>(), new HashSet<>(), new Holder<>());

@@ -24,6 +24,7 @@ final class Annotations {
 
   static final String COMMAND_ANNOTATION = "dev.modolus.annotations.command.Command";
   static final String UI_ANNOTATION = "dev.modolus.annotations.ui.UI";
+  static final String EXTENDS_ANNOTATION = "dev.modolus.annotations.extend.Extends";
   static final String EVENT_LISTENER_ANNOTATION = "dev.modolus.annotations.event.EventListener";
   static final String PROVIDE_SINGLETONS_ANNOTATION =
       "dev.modolus.annotations.singleton.ProvideSingletons";

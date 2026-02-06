@@ -28,10 +28,12 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import dev.modolus.annotations.extend.Extends;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
-public class TestPage extends InteractiveCustomUIPage<TestPage.Data> {
+@Extends(InteractiveCustomUIPage.class)
+public class TestPage extends AbstractTestPage<TestPage.Data> {
 
   public TestPage(@NotNull PlayerRef playerRef) {
     super(playerRef, CustomPageLifetime.CanDismiss, Data.CODEC);
